@@ -1,0 +1,2118 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CARO</title><style>:root{--bg-deep:#060910;--bg-panel:#0c111d;--grid-line:#1c2740;--text-dim:#6b7a99;--text-bright:#eaf6ff;--card-bg:#0e1524;--card-border:#1c2740;--x-color:#4dfff3;--o-color:#ff4dd8;--win-color:#ffd24d}*{box-sizing:border-box}body,html{margin:0;padding:0;height:100%;min-height:100vh;background:radial-gradient(circle at 20% 15%,rgba(77,255,243,.05),transparent 40%),radial-gradient(circle at 80% 85%,rgba(255,77,216,.05),transparent 40%),var(--bg-deep);display:flex;align-items:center;justify-content:center;font-family:'Segoe UI','Courier New',monospace;overflow:hidden;color:var(--text-bright)}.stage{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px}.title{font-weight:900;letter-spacing:10px;font-size:24px;margin:0;display:flex;align-items:center;gap:10px;color:var(--text-bright);text-shadow:0 0 8px var(--x-color),0 0 24px rgba(77,255,243,.4)}.title span{color:var(--o-color);text-shadow:0 0 8px var(--o-color),0 0 22px rgba(255,77,216,.45)}.hud{display:flex;justify-content:space-between;align-items:center;width:var(--board-size,480px);max-width:92vw;color:var(--text-dim);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;gap:6px;flex-wrap:wrap}.turn-tag{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:1.2px;padding:5px 11px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,.02)}.turn-dot{width:10px;height:10px;border-radius:50%;transition:.2s}.timer-tag{font-size:12px;letter-spacing:1px;padding:5px 11px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,.02);color:var(--text-bright);min-width:52px;text-align:center;transition:.2s}.move-count{font-size:10.5px;color:var(--text-dim)}.btn-row{display:flex;gap:6px}.icon-btn{background:0 0;border:1px solid var(--card-border);color:var(--text-dim);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;-webkit-tap-highlight-color:transparent}.icon-btn:hover{color:var(--x-color);border-color:var(--x-color)}.icon-btn:disabled{opacity:.35;cursor:not-allowed;outline:none}.hud2{display:flex;align-items:center;gap:8px;width:var(--board-size,480px);max-width:92vw;justify-content:center}.zoom-label{font-size:10px;letter-spacing:1.5px;color:var(--text-dim);min-width:78px;text-align:center;text-transform:uppercase}.hud3{display:flex;align-items:center;gap:9px;width:var(--board-size,480px);max-width:92vw;justify-content:center}.view-slider-label{font-size:9.5px;letter-spacing:1.2px;color:var(--text-dim);text-transform:uppercase;white-space:nowrap}.view-slider-val{font-size:10px;letter-spacing:1px;color:var(--text-bright);min-width:44px;text-align:center;white-space:nowrap}#viewSizeSlider{flex:1;max-width:220px;-webkit-appearance:none;appearance:none;height:4px;border-radius:3px;background:var(--card-border);outline:0;cursor:pointer}#viewSizeSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--win-color);box-shadow:0 0 8px rgba(255,210,77,.6);cursor:pointer;border:0}#viewSizeSlider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--win-color);box-shadow:0 0 8px rgba(255,210,77,.6);cursor:pointer;border:0}#viewSizeSlider::-moz-range-track{height:4px;border-radius:3px;background:var(--card-border)}.board-wrap{position:relative;border:1px solid #22314d;border-radius:10px;box-shadow:0 0 0 1px rgba(77,255,243,.06),0 0 40px rgba(77,255,243,.1),inset 0 0 70px rgba(0,0,0,.4);background:rgba(12,17,29,.32);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:hidden;touch-action:none}canvas{display:block;border-radius:10px;cursor:grab;touch-action:none}canvas.dragging{cursor:grabbing}.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;background:rgba(6,9,16,.3);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:10px;text-align:center;padding:18px;overflow-y:auto;overflow-anchor:none}
+#overlay{justify-content:flex-start}.overlay.hidden{display:none}.overlay h2{margin:0;font-size:19px;letter-spacing:4px;color:var(--o-color);text-shadow:0 0 10px rgba(255,77,216,.65)}.overlay h2.pop{animation:.5s cubic-bezier(.2,1.6,.4,1) popIn}@keyframes popIn{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}.overlay .sub{margin:-4px 0 2px;color:var(--text-dim);font-size:10.5px;letter-spacing:1px;max-width:360px;line-height:1.6}.opt-block{width:100%;max-width:360px;text-align:left}.opt-label{font-size:9.5px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px}.pill-row{display:flex;gap:6px;flex-wrap:wrap}.pill{flex:1;min-width:64px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-dim);padding:6px 5px;border-radius:7px;font-size:10px;letter-spacing:1px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit}.pill:hover{border-color:rgba(255,210,77,.5)}.pill.selected{border-color:var(--win-color);color:var(--win-color);background:rgba(255,210,77,.08)}.swatch{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}.swatch.rainbow{background:conic-gradient(from 0deg,#ff3b3b,#ff9f4d,#ffe14d,#4dff88,#4dc7ff,#8a4dff,#ff4dd8,#ff3b3b)!important}.turn-dot.rainbow{background:conic-gradient(from 0deg,#ff3b3b,#ff9f4d,#ffe14d,#4dff88,#4dc7ff,#8a4dff,#ff4dd8,#ff3b3b)!important;animation:2.4s linear infinite rainbowSpin}@keyframes rainbowSpin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}button.primary{font-family:inherit;font-weight:700;letter-spacing:3px;background:0 0;color:var(--x-color);border:1px solid var(--x-color);padding:10px 26px;border-radius:6px;cursor:pointer;text-transform:uppercase;font-size:12.5px;transition:.15s;box-shadow:0 0 10px rgba(77,255,243,.15)}button.primary:hover{background:rgba(77,255,243,.12);box-shadow:0 0 18px rgba(77,255,243,.4)}button.primary.ghost{color:var(--o-color);border-color:var(--o-color);box-shadow:0 0 10px rgba(255,77,216,.15)}button.primary.ghost:hover{background:rgba(255,77,216,.12);box-shadow:0 0 18px rgba(255,77,216,.4)}button:focus-visible{outline:2px solid var(--win-color);outline-offset:2px}.scoreboard{display:flex;gap:14px;font-size:11px;color:var(--text-dim);letter-spacing:.5px}.scoreboard b{font-size:14px}.hint{color:var(--text-dim);font-size:10px;letter-spacing:.8px;text-align:center;max-width:460px;line-height:1.6}
+.code-box{width:100%;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-bright);font-family:monospace;font-size:9.5px;padding:7px;border-radius:7px;resize:none;box-sizing:border-box;line-height:1.4;margin-top:2px}
+.code-box:focus{outline:none;border-color:var(--x-color)}
+.mini-btn{background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-dim);padding:5px 12px;border-radius:6px;font-size:9.5px;letter-spacing:1px;cursor:pointer;margin-top:5px;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.mini-btn:hover{color:var(--x-color);border-color:var(--x-color)}
+.online-status.ok{color:#4dff88}
+.online-status.err{color:var(--o-color)}.hint b{color:var(--text-bright)}
+.room-code{font-family:monospace;font-size:34px;font-weight:700;letter-spacing:8px;color:var(--win-color);text-shadow:0 0 12px rgba(255,210,77,.5);background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:12px 8px;margin-top:6px}
+.room-code-input{font-size:22px;font-weight:700;letter-spacing:8px;text-align:center;color:var(--win-color)}
+html.bg-sunset2,body.bg-sunset2{background:linear-gradient(-45deg,#dddd81,#e17979,#f2c14e,#e17979);background-size:400% 400%;animation:bgSunsetFlow 12s ease infinite}
+@keyframes bgSunsetFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+html.bg-oceanflow,body.bg-oceanflow{background:linear-gradient(-45deg,#00c6ff,#0072ff,#ff66cc,#ff9966);background-size:400% 400%;animation:bgOceanFlow 10s ease infinite}
+@keyframes bgOceanFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.bubble-light{position:fixed;width:12px;height:12px;border-radius:50%;pointer-events:none;z-index:1000;animation:bubbleFloat .8s ease-out forwards;box-shadow:0 0 10px rgba(239,112,220,.6)}
+@keyframes bubbleFloat{to{transform:translateY(-30px) scale(.5);opacity:0}}
+.auto-bubble{position:fixed;bottom:0;border-radius:50%;pointer-events:none;animation:bubbleUp 4s ease-in infinite;z-index:0}
+@keyframes bubbleUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-100vh) scale(.5);opacity:0}}
+.click-ripple{position:fixed;width:50px;height:50px;background:rgba(255,210,77,.35);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;animation:rippleAnim .6s ease-out forwards;z-index:999}
+@keyframes rippleAnim{to{transform:translate(-50%,-50%) scale(4);opacity:0}}
+/* Result-panel play/pause icons drawn with CSS (not unicode glyphs) so they
+   always render, even on devices/fonts missing symbols like ⏵/⏸. */
+.icn-play{display:inline-block;width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent currentColor;margin-left:2px;vertical-align:middle}
+.icn-pause{display:inline-flex;gap:3px;vertical-align:middle}
+.icn-pause i{display:block;width:3px;height:12px;background:currentColor;border-radius:1px;font-style:normal}
+/* Drag handle + draggable state for the result panel, so it can be moved off
+   the cells it's covering to review the board underneath. */
+.rp-handle{cursor:grab;touch-action:none;display:flex;justify-content:center;padding:2px 0 9px;margin:-4px -5px 5px}
+.rp-handle span{width:34px;height:4px;border-radius:2px;background:var(--card-border);display:block;pointer-events:none}
+#resultPanel.dragging{cursor:grabbing;box-shadow:0 14px 34px rgba(0,0,0,.6);transition:none}
+#resultPanel.dragging .rp-handle{cursor:grabbing}</style>
+<style>*{-webkit-user-select:none;user-select:none}</style>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head><body><div class="stage"><h1 class="title">CARO <span>5</span></h1><div class="hud" id="hudBar" style="display:none"><div class="turn-tag"><span class="turn-dot" id="turnDot"></span><span id="turnLabel">Lượt: X</span></div><div class="timer-tag" id="timerTag">⏱ 30s</div><div class="move-count" id="moveCount">Nước đi: 0</div><div class="btn-row"><button class="icon-btn" id="undoBtn" title="Hoàn tác">↩</button> <button class="icon-btn" id="pauseBtn" title="Tạm dừng (F11)"><span class="icn-pause"><i></i><i></i></span></button> <button class="icon-btn" id="settingsBtn" title="Cài đặt">⚙</button></div></div><div class="hud2" id="hudBar2" style="display:none"><button class="icon-btn" id="zoomOutBtn" title="Thu nhỏ">−</button> <span class="zoom-label" id="zoomLabel">Vùng: 11×11</span> <button class="icon-btn" id="zoomInBtn" title="Phóng to">+</button> <button class="icon-btn" id="recenterBtn" title="Về vị trí con trỏ">⌖</button></div><div class="hud3" id="hudBar3" style="display:none"><span class="view-slider-label">Ô hiển thị</span><input type="range" id="viewSizeSlider" min="5" max="26" step="1" value="11"><span class="view-slider-val" id="viewSizeVal">11×11</span></div><div class="board-wrap"><canvas id="board" width="480" height="480"></canvas><div class="overlay" id="overlay"><h2>CARO 5</h2><p class="sub">Xếp đủ 5 quân liên tiếp theo hàng ngang, dọc hoặc chéo để thắng. Bàn lớn có thể kéo để xem, thời gian mỗi lượt tùy bạn chọn!</p><div class="opt-block"><div class="opt-label">THỂ THỨC</div><div class="pill-row" id="vsRow"><button class="pill selected" data-value="pvp">2 NGƯỜI</button> <button class="pill" data-value="ai">ĐẤU VỚI MÁY</button> <button class="pill" data-value="online">ONLINE (LAN)</button></div></div><div class="opt-block" id="diffBlock" style="display:none"><div class="opt-label">ĐỘ KHÓ MÁY</div><div class="pill-row" id="diffRow"><button class="pill selected" data-value="easy">DỄ</button> <button class="pill" data-value="normal">VỪA</button> <button class="pill" data-value="hard">KHÓ</button> <button class="pill" data-value="vhard">CỰC KHÓ</button> <button class="pill" data-value="master">BẤT KHẢ CHIẾN BẠI</button></div></div><div class="opt-block" id="firstBlock" style="display:none"><div class="opt-label">LƯỢT ĐI TRƯỚC</div><div class="pill-row" id="firstRow"><button class="pill selected" data-value="human">BẠN ĐI TRƯỚC</button> <button class="pill" data-value="ai">MÁY ĐI TRƯỚC</button></div></div><div class="opt-block" id="onlineBlock" style="display:none">
+<div class="opt-label">PHƯƠNG THỨC KẾT NỐI</div>
+<div class="pill-row" id="connMethodRow"><button class="pill selected" data-value="code">MÃ PHÒNG (INTERNET)</button> <button class="pill" data-value="lan">LAN SERVER (NODE.JS)</button> <button class="pill" data-value="manual">P2P THỦ CÔNG</button></div>
+
+<div id="codeMethodPanel" style="margin-top:8px">
+<p class="hint" style="text-align:left;margin:0 0 6px">Tạo phòng là vào phòng chờ ngay, đọc mã cho bạn của bạn. Hoặc nhập đúng mã 6 số để vào thẳng phòng của họ — hoặc bấm Ngẫu Nhiên để tự động ghép với ai đó cũng đang tìm trận. Cần internet (dùng máy chủ ghép cặp công cộng miễn phí).</p>
+<div class="pill-row" id="onlineRoleRow"><button class="pill selected" data-value="host">TẠO PHÒNG (X)</button> <button class="pill" data-value="guest">VÀO PHÒNG (O)</button> <button class="pill" data-value="random">NGẪU NHIÊN</button></div>
+<div id="hostPanel" style="margin-top:8px">
+  <button class="primary" id="createRoomBtn" style="width:100%">Tạo Phòng</button>
+  <div id="hostStep2" style="display:none;text-align:center">
+    <div class="opt-label" style="margin-top:10px">MÃ PHÒNG CỦA BẠN — ĐỌC CHO BẠN CỦA BẠN</div>
+    <div id="roomCodeDisplay" class="room-code"></div>
+    <button class="mini-btn" id="copyRoomCodeBtn">Sao Chép Mã</button>
+  </div>
+</div>
+<div id="guestPanel" style="display:none;margin-top:8px">
+  <div class="opt-label">NHẬP MÃ PHÒNG (6 SỐ)</div>
+  <input type="text" id="guestCodeInput" class="code-box room-code-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000">
+  <button class="primary" id="joinRoomBtn" style="width:100%;margin-top:8px">Vào Phòng</button>
+</div>
+<div id="randomPanel" style="display:none;margin-top:8px;text-align:center">
+  <p class="hint" style="text-align:left;margin:0 0 8px">Không cần mã — bấm để vào phòng chờ ngẫu nhiên. Ai khác cũng bấm Ngẫu Nhiên cùng lúc sẽ tự động được ghép cặp với bạn, giống ghép trận trong game thật.</p>
+  <button class="primary" id="randomMatchBtn" style="width:100%">Tìm Trận Ngẫu Nhiên</button>
+  <div id="randomStep2" style="display:none;text-align:center">
+    <div class="opt-label" style="margin-top:10px">ĐANG TÌM ĐỐI THỦ NGẪU NHIÊN...</div>
+    <button class="mini-btn" id="cancelRandomBtn">Hủy Tìm Trận</button>
+  </div>
+</div>
+<p class="hint" id="onlineStatus" style="margin-top:8px;min-height:14px"></p>
+</div>
+
+<div id="lanMethodPanel" style="display:none;margin-top:8px">
+<p class="hint" style="text-align:left;margin:0 0 6px">Không cần internet — chỉ cần 2 máy cùng mạng LAN. Máy tạo phòng tải <b>server.js</b> bên dưới, chạy <b>npm install ws</b> rồi <b>node server.js</b> trước khi tạo phòng.</p>
+<div class="pill-row" id="lanRoleRow"><button class="pill selected" data-value="host">TẠO PHÒNG (X, máy chạy server)</button> <button class="pill" data-value="guest">VÀO PHÒNG (O)</button></div>
+<div id="lanHostPanel" style="margin-top:8px">
+  <div class="opt-label">CỔNG SERVER (PORT)</div>
+  <input type="text" id="lanHostPort" class="code-box" value="8787" inputmode="numeric">
+  <button class="primary" id="lanCreateBtn" style="width:100%;margin-top:6px">Tạo Phòng</button>
+  <div id="lanHostStep2" style="display:none;text-align:center">
+    <div class="opt-label" style="margin-top:10px">MÃ PHÒNG — ĐỌC CHO BẠN CỦA BẠN KÈM ĐỊA CHỈ IP MÁY NÀY</div>
+    <div id="lanRoomCodeDisplay" class="room-code"></div>
+  </div>
+</div>
+<div id="lanGuestPanel" style="display:none;margin-top:8px">
+  <div class="opt-label">ĐỊA CHỈ IP MÁY CHỦ (VD: 10.220.86.5)</div>
+  <input type="text" id="lanGuestIp" class="code-box" placeholder="10.220.86.xxx">
+  <div class="opt-label" style="margin-top:6px">CỔNG (PORT)</div>
+  <input type="text" id="lanGuestPort" class="code-box" value="8787" inputmode="numeric">
+  <div class="opt-label" style="margin-top:6px">MÃ PHÒNG (6 SỐ)</div>
+  <input type="text" id="lanGuestCode" class="code-box room-code-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000">
+  <button class="primary" id="lanJoinBtn" style="width:100%;margin-top:8px">Vào Phòng</button>
+</div>
+<p class="hint" id="lanStatus" style="margin-top:8px;min-height:14px"></p>
+<button class="mini-btn" id="downloadServerBtn" type="button">Tải server.js</button>
+</div>
+
+<div id="manualMethodPanel" style="display:none;margin-top:8px">
+<p class="hint" style="text-align:left;margin:0 0 6px">Không cần server, không cần internet ổn định — nhưng phải tự gửi qua lại 2 đoạn mã kết nối (Zalo, tin nhắn...).</p>
+<div class="pill-row" id="manualRoleRow"><button class="pill selected" data-value="host">TẠO PHÒNG (X)</button> <button class="pill" data-value="guest">VÀO PHÒNG (O)</button></div>
+<div id="manualHostPanel" style="margin-top:8px">
+  <button class="primary" id="manualCreateBtn" style="width:100%">Tạo Mã Phòng</button>
+  <div id="manualHostStep2" style="display:none">
+    <div class="opt-label" style="margin-top:8px">1. Gửi mã này cho bạn của bạn</div>
+    <textarea id="manualOfferCode" class="code-box" readonly rows="3"></textarea>
+    <button class="mini-btn" id="manualCopyOfferBtn">Sao Chép</button>
+    <div class="opt-label" style="margin-top:8px">2. Dán mã trả lời họ gửi lại đây</div>
+    <textarea id="manualAnswerInput" class="code-box" rows="3" placeholder="Dán mã trả lời vào đây..."></textarea>
+    <button class="primary" id="manualConnectBtn" style="width:100%;margin-top:6px">Kết Nối</button>
+  </div>
+</div>
+<div id="manualGuestPanel" style="display:none;margin-top:8px">
+  <div class="opt-label">1. Dán mã phòng bạn nhận được</div>
+  <textarea id="manualOfferInput" class="code-box" rows="3" placeholder="Dán mã phòng vào đây..."></textarea>
+  <button class="primary" id="manualJoinBtn" style="width:100%;margin-top:6px">Tạo Mã Trả Lời</button>
+  <div id="manualGuestStep2" style="display:none">
+    <div class="opt-label" style="margin-top:8px">2. Gửi mã này lại cho người tạo phòng</div>
+    <textarea id="manualAnswerCode" class="code-box" readonly rows="3"></textarea>
+    <button class="mini-btn" id="manualCopyAnswerBtn">Sao Chép</button>
+  </div>
+</div>
+<p class="hint" id="manualStatus" style="margin-top:8px;min-height:14px"></p>
+</div>
+
+</div><div class="opt-block"><div class="opt-label">THỜI GIAN MỖI LƯỢT</div><div class="pill-row" id="timeRow"><button class="pill" data-value="15">15 GIÂY</button> <button class="pill selected" data-value="30">30 GIÂY</button> <button class="pill" data-value="45">45 GIÂY</button> <button class="pill" data-value="60">60 GIÂY</button> <button class="pill" data-value="90">90 GIÂY</button> <button class="pill" data-value="inf">KHÔNG GIỚI HẠN</button></div></div><div class="opt-block"><div class="opt-label">KÍCH THƯỚC BÀN</div><div class="pill-row" id="sizeRow"><button class="pill" data-value="10">NHỎ 10×10</button> <button class="pill selected" data-value="13">VỪA 13×13</button> <button class="pill" data-value="16">LỚN 16×16</button> <button class="pill" data-value="32">SIÊU LỚN 32×32</button> <button class="pill" data-value="64">CỰC LỚN 64×64</button></div></div><div class="opt-block"><div class="opt-label">BẢNG MÀU</div><div class="pill-row" id="themeRow"><button class="pill selected" data-value="neon"><span class="swatch" style="background:#4dfff3"></span>NEON</button> <button class="pill" data-value="sunset"><span class="swatch" style="background:#ff9f4d"></span>HOÀNG HÔN</button> <button class="pill" data-value="matrix"><span class="swatch" style="background:#4dff88"></span>MA TRẬN</button> <button class="pill" data-value="ocean"><span class="swatch" style="background:#4dc7ff"></span>ĐẠI DƯƠNG</button> <button class="pill" data-value="rainbow"><span class="swatch rainbow"></span>CẦU VỒNG</button></div></div><div class="opt-block"><div class="opt-label">MÀU NỀN TRANG</div><div class="pill-row" id="bgRow"><button class="pill selected" data-value="default"><span class="swatch" style="background:#0a0f1c"></span>MẶC ĐỊNH</button> <button class="pill" data-value="sunset2"><span class="swatch" style="background:linear-gradient(45deg,#dddd81,#e17979)"></span>VÀNG HỒNG</button> <button class="pill" data-value="oceanflow"><span class="swatch" style="background:linear-gradient(45deg,#00c6ff,#ff66cc)"></span>SÓNG BIỂN</button> <button class="pill" data-value="custom"><span class="swatch" id="bgCustomSwatch" style="background:#141a2b"></span>TUỲ CHỌN</button></div><div id="bgCustomWrap" style="display:none;align-items:center;gap:7px;margin-top:6px"><span style="font-size:9.5px;letter-spacing:1px;color:var(--text-dim)">CHỌN MÀU:</span><input type="color" id="bgCustomPicker" value="#141a2b"></div></div><div class="opt-block"><div class="opt-label">HIỆU ỨNG CHUỘT</div><div class="pill-row" id="mouseFxRow"><button class="pill selected" data-value="off">TẮT</button> <button class="pill" data-value="on">BẬT · BONG BÓNG &amp; GỢN SÓNG</button></div></div><div class="opt-block"><div class="opt-label">ÂM THANH &amp; RUNG</div><div class="pill-row" id="soundRow"><button class="pill selected" data-value="on">BẬT</button> <button class="pill" data-value="off">TẮT</button></div></div><button class="primary" id="startBtn">Bắt Đầu</button><div class="scoreboard" id="scoreboard"></div></div><div class="overlay hidden" id="pauseOverlay"><h2>TẠM DỪNG</h2><p class="sub">Ván đấu đang tạm dừng — thời gian và bàn cờ được giữ nguyên.</p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button class="primary" id="resumeBtn">Tiếp Tục</button> <button class="primary ghost" id="menuBtn">Trở Về Menu</button></div><p class="hint" style="margin-top:2px">Phím tắt: <b>F11</b></p></div></div><p class="hint" id="hintText">Kéo bàn cờ để xem xung quanh · <b>Mũi tên</b> di chuyển con trỏ, <b>Enter/Space</b> để đánh · nút <b>⌖</b> quay lại vị trí con trỏ · thời gian mỗi lượt tùy chọn trong Cài đặt</p></div><script>
+(function(){
+'use strict';
+
+/* ============ DOM ============ */
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const turnDot = document.getElementById('turnDot');
+const turnLabel = document.getElementById('turnLabel');
+const timerTag = document.getElementById('timerTag');
+const moveCountEl = document.getElementById('moveCount');
+const undoBtn = document.getElementById('undoBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const pauseOverlay = document.getElementById('pauseOverlay');
+const resumeBtn = document.getElementById('resumeBtn');
+const menuBtn = document.getElementById('menuBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const hudBar = document.getElementById('hudBar');
+const hudBar2 = document.getElementById('hudBar2');
+const hudBar3 = document.getElementById('hudBar3');
+const zoomOutBtn = document.getElementById('zoomOutBtn');
+const zoomInBtn = document.getElementById('zoomInBtn');
+const recenterBtn = document.getElementById('recenterBtn');
+const zoomLabel = document.getElementById('zoomLabel');
+const viewSizeSlider = document.getElementById('viewSizeSlider');
+const viewSizeVal = document.getElementById('viewSizeVal');
+const boardWrap = document.querySelector('.board-wrap');
+const vsRow = document.getElementById('vsRow');
+const diffRow = document.getElementById('diffRow');
+const diffBlock = document.getElementById('diffBlock');
+const firstRow = document.getElementById('firstRow');
+const firstBlock = document.getElementById('firstBlock');
+const onlineBlock = document.getElementById('onlineBlock');
+const connMethodRow = document.getElementById('connMethodRow');
+const codeMethodPanel = document.getElementById('codeMethodPanel');
+const lanMethodPanel = document.getElementById('lanMethodPanel');
+const manualMethodPanel = document.getElementById('manualMethodPanel');
+// -- method 1: mã phòng qua PeerJS --
+const onlineRoleRow = document.getElementById('onlineRoleRow');
+const hostPanel = document.getElementById('hostPanel');
+const guestPanel = document.getElementById('guestPanel');
+const createRoomBtn = document.getElementById('createRoomBtn');
+const hostStep2 = document.getElementById('hostStep2');
+const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+const copyRoomCodeBtn = document.getElementById('copyRoomCodeBtn');
+const guestCodeInput = document.getElementById('guestCodeInput');
+const joinRoomBtn = document.getElementById('joinRoomBtn');
+const randomPanel = document.getElementById('randomPanel');
+const randomMatchBtn = document.getElementById('randomMatchBtn');
+const randomStep2 = document.getElementById('randomStep2');
+const cancelRandomBtn = document.getElementById('cancelRandomBtn');
+const onlineStatusEl = document.getElementById('onlineStatus');
+// -- method 2: LAN Node.js server --
+const lanRoleRow = document.getElementById('lanRoleRow');
+const lanHostPanel = document.getElementById('lanHostPanel');
+const lanGuestPanel = document.getElementById('lanGuestPanel');
+const lanHostPort = document.getElementById('lanHostPort');
+const lanCreateBtn = document.getElementById('lanCreateBtn');
+const lanHostStep2 = document.getElementById('lanHostStep2');
+const lanRoomCodeDisplay = document.getElementById('lanRoomCodeDisplay');
+const lanGuestIp = document.getElementById('lanGuestIp');
+const lanGuestPort = document.getElementById('lanGuestPort');
+const lanGuestCode = document.getElementById('lanGuestCode');
+const lanJoinBtn = document.getElementById('lanJoinBtn');
+const lanStatusEl = document.getElementById('lanStatus');
+const downloadServerBtn = document.getElementById('downloadServerBtn');
+// -- method 3: thủ công P2P (copy/paste mã) --
+const manualRoleRow = document.getElementById('manualRoleRow');
+const manualHostPanel = document.getElementById('manualHostPanel');
+const manualGuestPanel = document.getElementById('manualGuestPanel');
+const manualCreateBtn = document.getElementById('manualCreateBtn');
+const manualHostStep2 = document.getElementById('manualHostStep2');
+const manualOfferCode = document.getElementById('manualOfferCode');
+const manualAnswerInput = document.getElementById('manualAnswerInput');
+const manualConnectBtn = document.getElementById('manualConnectBtn');
+const manualOfferInput = document.getElementById('manualOfferInput');
+const manualJoinBtn = document.getElementById('manualJoinBtn');
+const manualGuestStep2 = document.getElementById('manualGuestStep2');
+const manualAnswerCode = document.getElementById('manualAnswerCode');
+const manualCopyOfferBtn = document.getElementById('manualCopyOfferBtn');
+const manualCopyAnswerBtn = document.getElementById('manualCopyAnswerBtn');
+const manualStatusEl = document.getElementById('manualStatus');
+const timeRow = document.getElementById('timeRow');
+const sizeRow = document.getElementById('sizeRow');
+const themeRow = document.getElementById('themeRow');
+const bgRow = document.getElementById('bgRow');
+const bgCustomWrap = document.getElementById('bgCustomWrap');
+const bgCustomPicker = document.getElementById('bgCustomPicker');
+const bgCustomSwatch = document.getElementById('bgCustomSwatch');
+const mouseFxRow = document.getElementById('mouseFxRow');
+const soundRow = document.getElementById('soundRow');
+const startBtn = document.getElementById('startBtn');
+const scoreboard = document.getElementById('scoreboard');
+const hintText = document.getElementById('hintText');
+
+/* ============ THEMES ============ */
+const THEMES = {
+  neon:   {x:'#4dfff3', o:'#ff4dd8'},
+  sunset: {x:'#ff9f4d', o:'#ff4d6a'},
+  matrix: {x:'#4dff88', o:'#eaff4d'},
+  ocean:  {x:'#4dc7ff', o:'#4d6aff'},
+  rainbow:{x:'#ff4dd8', o:'#4dfff3', rainbow:true}
+};
+
+/* ============ VISIBLE AREA SIZE (how many cells fit on screen) ============ */
+const VIS_MIN = 5, VIS_MAX = 26;
+let visibleCells = 11; // matches the default 11x11 viewport
+
+/* ============ STATE ============ */
+let cfg = {vs:'pvp', diff:'easy', size:13, theme:'neon', time:'30', first:'human', bg:'default', mouseFx:'off', sound:'on'};
+let SIZE = 13, CELL = 44;
+let board = [];
+let current = 'X';
+let humanSym = 'X', aiSym = 'O';
+let history = []; // {r,c,player}
+let gameOver = false;
+let aiThinking = false;
+let winLine = null;
+let scores = {X:0, O:0};
+let camX = 0, camY = 0; // top-left of visible viewport in board pixel space
+let cursor = {r:0, c:0};
+let timeLeft = 30;
+let timerInterval = null;
+let dragging = false, dragMoved = false, dragStart = null;
+let paused = false;
+let aiTimeoutId = null;
+let onlineRole = null; // 'host' | 'guest'
+let peerObj = null;    // PeerJS Peer instance (method 1 only)
+let onlineConnected = false;
+let qmToken = 0;          // quick-match session token — bumped on cancel/reset so stale async steps no-op
+let qmStartTimeout = null; // quick-match guest safety-net timer (see scanQuickMatchSlots)
+let localSymbol = null; // this client's symbol when cfg.vs==='online'
+
+const W = () => canvas.width;
+const H = () => canvas.height;
+
+/* ============ RESPONSIVE + RETINA CANVAS SIZING ============
+   The canvas backing store (canvas.width/height) is kept separate from its
+   CSS display size. All game math (CELL, camX/camY, drawing) works in
+   backing-store pixels, and pointer coordinates are already converted from
+   CSS px to backing px via (canvas.width/rect.width) - that conversion is
+   exactly what also gives us crisp rendering on high-DPI screens: we just
+   need the backing store to be displaySize * devicePixelRatio instead of a
+   fixed 480x480. */
+function computeDisplaySize(){
+  const stageEl = document.querySelector('.stage');
+  let usedH = 0;
+  [...stageEl.children].forEach(el => { if(el !== boardWrap) usedH += el.offsetHeight; });
+  const stageStyles = getComputedStyle(stageEl);
+  const gap = parseFloat(stageStyles.rowGap || stageStyles.gap) || 10;
+  usedH += gap * stageEl.children.length;
+  const availH = window.innerHeight - usedH - 36 /*stage vertical padding*/ - 12 /*breathing room*/;
+  const availW = window.innerWidth * 0.94;
+  const size = Math.floor(Math.min(availW, availH, 720));
+  return Math.max(240, size);
+}
+function resizeCanvas(){
+  const size = computeDisplaySize();
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  canvas.width = Math.round(size * dpr);
+  canvas.height = Math.round(size * dpr);
+  // keep the HUD bars the same visual width as the canvas at any screen size
+  document.documentElement.style.setProperty('--board-size', size + 'px');
+  CELL = W() / visibleCells;
+  clampCamera();
+}
+
+/* ============ SETTINGS UI ============ */
+const PILL_ROWS = [
+  {row: vsRow, key:'vs', onChange: v => {
+    diffBlock.style.display = v==='ai' ? '' : 'none';
+    firstBlock.style.display = v==='ai' ? '' : 'none';
+    onlineBlock.style.display = v==='online' ? '' : 'none';
+    startBtn.style.display = v==='online' ? 'none' : '';
+    if(v!=='online') resetOnlineConnection();
+  }},
+  {row: diffRow, key:'diff'},
+  {row: firstRow, key:'first'},
+  {row: timeRow, key:'time'},
+  {row: sizeRow, key:'size'},
+  {row: themeRow, key:'theme', onChange: applyTheme},
+  {row: bgRow, key:'bg', onChange: v => {
+    bgCustomWrap.style.display = v==='custom' ? 'flex' : 'none';
+    applyBackground(v);
+  }},
+  {row: mouseFxRow, key:'mouseFx', onChange: v => { if(v==='on') enableMouseFx(); else disableMouseFx(); }},
+  {row: soundRow, key:'sound'}
+];
+
+function selectPill(row, key, value, opts){
+  opts = opts || {};
+  const btn = [...row.querySelectorAll('.pill')].find(p => p.dataset.value === value);
+  if(!btn) return;
+  [...row.querySelectorAll('.pill')].forEach(p => p.classList.toggle('selected', p===btn));
+  cfg[key] = value;
+  const meta = PILL_ROWS.find(m => m.row===row);
+  if(meta && meta.onChange) meta.onChange(value);
+  if(!opts.silent) saveSettings();
+}
+
+PILL_ROWS.forEach(({row, key}) => {
+  row.addEventListener('click', e => {
+    const btn = e.target.closest('.pill');
+    if(!btn) return;
+    selectPill(row, key, btn.dataset.value);
+  });
+});
+
+bgCustomPicker.addEventListener('input', () => {
+  bgCustomSwatch.style.background = bgCustomPicker.value;
+  if(cfg.bg==='custom') applyBackground('custom');
+  saveSettings();
+});
+
+/* ============ PERSISTENCE (localStorage: settings & scoreboard) ============ */
+const LS_SETTINGS_KEY = 'caroV10.settings';
+const LS_SCORES_KEY = 'caroV10.scores';
+let saveSettingsTimer = null;
+function saveSettings(){
+  try{
+    localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify({cfg, bgCustom: bgCustomPicker.value, visibleCells: Math.round(visibleCells)}));
+  }catch(e){ /* private mode / quota / unavailable - ignore, gameplay still works */ }
+}
+function scheduleSaveSettings(){
+  clearTimeout(saveSettingsTimer);
+  saveSettingsTimer = setTimeout(saveSettings, 300);
+}
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(LS_SETTINGS_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(data.bgCustom){
+      bgCustomPicker.value = data.bgCustom;
+      bgCustomSwatch.style.background = data.bgCustom;
+    }
+    if(data.cfg){
+      PILL_ROWS.forEach(({row,key}) => {
+        if(data.cfg[key] !== undefined) selectPill(row, key, data.cfg[key], {silent:true});
+      });
+    }
+    if(data.visibleCells){
+      visibleCells = Math.min(VIS_MAX, Math.max(VIS_MIN, Math.round(data.visibleCells)));
+    }
+  }catch(e){ /* corrupt/unavailable storage - fall back to defaults */ }
+}
+function saveScores(){
+  try{ localStorage.setItem(LS_SCORES_KEY, JSON.stringify(scores)); }catch(e){}
+}
+function loadScores(){
+  try{
+    const raw = localStorage.getItem(LS_SCORES_KEY);
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(s && typeof s==='object') scores = {X: s.X||0, O: s.O||0};
+  }catch(e){ /* ignore */ }
+}
+
+function applyTheme(name){
+  const t = THEMES[name] || THEMES.neon;
+  document.documentElement.style.setProperty('--x-color', t.x);
+  document.documentElement.style.setProperty('--o-color', t.o);
+  turnDot.classList.toggle('rainbow', !!t.rainbow);
+}
+applyTheme('neon');
+
+/* ============ BACKGROUND PICKER (page background, independent of piece theme) ============ */
+function applyBackground(name){
+  const targets = [document.documentElement, document.body];
+  targets.forEach(el => { el.classList.remove('bg-sunset2', 'bg-oceanflow'); el.style.background = ''; });
+  if(name === 'sunset2') targets.forEach(el => el.classList.add('bg-sunset2'));
+  else if(name === 'oceanflow') targets.forEach(el => el.classList.add('bg-oceanflow'));
+  else if(name === 'custom') targets.forEach(el => el.style.background = bgCustomPicker.value);
+  // 'default' -> classes/inline cleared above, falls back to the original CSS background
+}
+
+/* ============ MOUSE EFFECTS (bubble trail + floating bubbles + click ripple) ============ */
+let mouseFxOn = false;
+let mouseFxLastX = 0, mouseFxLastY = 0, mouseFxLastTime = 0;
+let autoBubbleInterval = null;
+const BUBBLE_TRAIL_COLORS = ['#ff66cc', '#66ccff', '#ffff66', '#99ff99', '#ff9966'];
+const AUTO_BUBBLE_COLORS = ['#ffffff44', '#ff99cc55', '#99ccff44', '#ffff9955'];
+
+function mouseFxMoveHandler(e){
+  const now = Date.now();
+  const moved = Math.abs(e.clientX - mouseFxLastX) > 2 || Math.abs(e.clientY - mouseFxLastY) > 2;
+  if(moved && now - mouseFxLastTime > 50){
+    mouseFxLastX = e.clientX; mouseFxLastY = e.clientY; mouseFxLastTime = now;
+    const bubble = document.createElement('span');
+    bubble.classList.add('bubble-light');
+    bubble.style.background = BUBBLE_TRAIL_COLORS[Math.floor(Math.random()*BUBBLE_TRAIL_COLORS.length)];
+    bubble.style.left = e.clientX + 'px';
+    bubble.style.top = e.clientY + 'px';
+    document.body.appendChild(bubble);
+    setTimeout(() => bubble.remove(), 800);
+  }
+}
+function mouseFxClickHandler(e){
+  const ripple = document.createElement('div');
+  ripple.className = 'click-ripple';
+  ripple.style.left = e.clientX + 'px';
+  ripple.style.top = e.clientY + 'px';
+  document.body.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+}
+function createAutoBubble(){
+  const bubble = document.createElement('span');
+  bubble.classList.add('auto-bubble');
+  bubble.style.left = Math.random()*window.innerWidth + 'px';
+  const size = Math.random()*10 + 5;
+  bubble.style.width = size + 'px';
+  bubble.style.height = size + 'px';
+  bubble.style.background = AUTO_BUBBLE_COLORS[Math.floor(Math.random()*AUTO_BUBBLE_COLORS.length)];
+  document.body.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 4000);
+}
+function enableMouseFx(){
+  if(mouseFxOn) return;
+  mouseFxOn = true;
+  document.addEventListener('mousemove', mouseFxMoveHandler);
+  document.addEventListener('click', mouseFxClickHandler);
+  autoBubbleInterval = setInterval(createAutoBubble, 150);
+}
+function disableMouseFx(){
+  mouseFxOn = false;
+  document.removeEventListener('mousemove', mouseFxMoveHandler);
+  document.removeEventListener('click', mouseFxClickHandler);
+  clearInterval(autoBubbleInterval);
+  autoBubbleInterval = null;
+}
+
+/* ============ AUDIO (small synthesized SFX, no external files) + HAPTICS ============ */
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    const Ctor = window.AudioContext || window.webkitAudioContext;
+    if(!Ctor) return null;
+    audioCtx = new Ctor();
+  }
+  if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+function playTone(freq, duration, type, startDelay, gainPeak){
+  if(cfg.sound !== 'on') return;
+  duration = duration || 0.12; type = type || 'sine'; startDelay = startDelay || 0; gainPeak = gainPeak==null ? 0.16 : gainPeak;
+  try{
+    const ctxA = getAudioCtx();
+    if(!ctxA) return;
+    const osc = ctxA.createOscillator();
+    const gain = ctxA.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    const t0 = ctxA.currentTime + startDelay;
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(gainPeak, t0 + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+    osc.connect(gain).connect(ctxA.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.03);
+  }catch(e){ /* audio unavailable - silently skip */ }
+}
+function sfxMove(player){ playTone(player==='X' ? 540 : 420, 0.09, 'triangle', 0, 0.14); }
+function sfxWin(){ [523.25,659.25,783.99,1046.5].forEach((f,i) => playTone(f, 0.2, 'sine', i*0.09, 0.15)); }
+function sfxDraw(){ playTone(300, 0.3, 'sawtooth', 0, 0.1); playTone(230, 0.35, 'sawtooth', 0.12, 0.09); }
+function sfxTimeout(){ playTone(170, 0.22, 'square', 0, 0.13); }
+function vibrate(pattern){
+  if(cfg.sound !== 'on') return;
+  if(navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} }
+}
+
+startBtn.addEventListener('click', startGame);
+function setHudVisible(show){
+  const d = show ? '' : 'none';
+  hudBar.style.display = d;
+  hudBar2.style.display = d;
+  hudBar3.style.display = d;
+}
+
+/* ============ ONLINE — shared transport layer ============
+   Three independent connection methods (mã phòng qua PeerJS / LAN Node.js
+   server / P2P thủ công) all funnel into the same small `transport` object
+   below ({send(obj), isOpen(), close()}), so the actual game logic
+   (handleOnlineMessage / applyMove / returnToMenu) never needs to know
+   which one is active. */
+let connMethod = 'code'; // 'code' | 'lan' | 'manual'
+let transport = null;
+let manualPc = null; // RTCPeerConnection, only used by the "P2P thủ công" method
+function onlineSend(obj){ if(transport) transport.send(obj); }
+function onlineIsOpen(){ return !!(transport && transport.isOpen()); }
+function onlineTeardown(){
+  if(transport){ try{ transport.close(); }catch(e){} transport = null; }
+  if(peerObj){ try{ peerObj.destroy(); }catch(e){} peerObj = null; }
+  if(manualPc){ try{ manualPc.close(); }catch(e){} manualPc = null; }
+}
+function setConnStatus(msg, kind){
+  const el = connMethod==='lan' ? lanStatusEl : connMethod==='manual' ? manualStatusEl : onlineStatusEl;
+  el.textContent = msg;
+  el.className = 'hint online-status' + (kind ? ' ' + kind : '');
+}
+function copyText(str){
+  const ta = document.createElement('textarea');
+  ta.value = str;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+  if(navigator.clipboard) navigator.clipboard.writeText(str).catch(()=>{});
+}
+function onTransportOpen(){
+  onlineConnected = true;
+  if(onlineRole === 'host'){
+    localSymbol = 'X';
+    onlineSend({type:'start', size: cfg.size, time: cfg.time});
+    startOnlineGame();
+  } else {
+    setConnStatus('Đã kết nối! Đang chờ chủ phòng bắt đầu...', 'ok');
+  }
+}
+function onTransportClose(){
+  if(cfg.vs==='online' && !gameOver && localSymbol) handlePeerLeft();
+  onlineConnected = false;
+}
+function handleOnlineMessage(msg){
+  if(msg.type === 'start'){
+    if(qmStartTimeout){ clearTimeout(qmStartTimeout); qmStartTimeout = null; } // real start arrived, cancel the quick-match safety net
+    cfg.size = msg.size;
+    cfg.time = msg.time;
+    localSymbol = 'O';
+    startOnlineGame();
+  } else if(msg.type === 'move'){
+    if(gameOver) return;
+    applyMove(msg.r, msg.c, true);
+  } else if(msg.type === 'pause'){
+    if(!gameOver && !paused) pauseGame(true);
+  } else if(msg.type === 'resume'){
+    if(!gameOver && paused && pausedByPeer) resumeGame(true);
+  } else if(msg.type === 'bye'){
+    handlePeerLeft();
+  }
+}
+/* The peer disconnecting or explicitly leaving (Trở Về Menu) ends the match
+   immediately in the local player's favor - a live match with no opponent
+   left to play has nothing else it can fairly resolve to, and this way the
+   remaining player is never stuck waiting indefinitely for someone who
+   isn't coming back. */
+function handlePeerLeft(){
+  if(gameOver) return;
+  onlineConnected = false;
+  gameOver = true;
+  paused = false;
+  pausedByPeer = false;
+  pauseOverlay.classList.add('hidden');
+  clearInterval(timerInterval);
+  if(aiTimeoutId){ clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+  const winner = localSymbol;
+  if(winner){
+    scores[winner] = (scores[winner]||0)+1;
+    saveScores();
+    sfxWin();
+    vibrate([30,40,30,40,80]);
+  }
+  updateHud();
+  reviewIndex = history.length;
+  reviewing = true;
+  showResultPanel(winner, {
+    title: winner ? (winner + ' THẮNG — ĐỐI THỦ ĐÃ THOÁT') : 'ĐỐI THỦ ĐÃ THOÁT',
+    sub: 'Đối thủ đã rời phòng hoặc mất kết nối giữa ván. Bấm ⚙ để trở về menu.'
+  });
+}
+function startOnlineGame(){
+  hideResultPanel();
+  SIZE = parseInt(cfg.size, 10);
+  resizeCanvas();
+  board = Array.from({length:SIZE}, () => Array(SIZE).fill(null));
+  history = [];
+  reviewIndex = 0;
+  gameOver = false;
+  winLine = null;
+  aiThinking = false;
+  paused = false;
+  pausedByPeer = false;
+  current = 'X';
+  humanSym = localSymbol;
+  aiSym = null;
+  cursor = {r: Math.floor(SIZE/2), c: Math.floor(SIZE/2)};
+  centerCamera(cursor.r, cursor.c);
+  updateZoomLabel();
+  updateHud();
+  resetTimer();
+  overlay.classList.add('hidden');
+  setHudVisible(true);
+  draw();
+}
+function resetOnlineConnection(){
+  qmToken++; // invalidate any in-flight quick-match scan/host steps
+  if(qmStartTimeout){ clearTimeout(qmStartTimeout); qmStartTimeout = null; }
+  onlineTeardown();
+  onlineConnected = false;
+  onlineRole = null;
+  localSymbol = null;
+  // method 1: mã phòng (PeerJS)
+  hostStep2.style.display = 'none';
+  createRoomBtn.style.display = '';
+  createRoomBtn.disabled = false;
+  joinRoomBtn.style.display = '';
+  joinRoomBtn.disabled = false;
+  roomCodeDisplay.textContent = '';
+  guestCodeInput.value = '';
+  // method 1b: ngẫu nhiên (auto-matchmaking, same broker as mã phòng)
+  randomStep2.style.display = 'none';
+  randomMatchBtn.style.display = '';
+  onlineStatusEl.textContent = ''; onlineStatusEl.className = 'hint online-status';
+  // method 2: LAN server
+  lanHostStep2.style.display = 'none';
+  lanCreateBtn.style.display = '';
+  lanCreateBtn.disabled = false;
+  lanJoinBtn.style.display = '';
+  lanJoinBtn.disabled = false;
+  lanRoomCodeDisplay.textContent = '';
+  lanGuestCode.value = '';
+  lanStatusEl.textContent = ''; lanStatusEl.className = 'hint online-status';
+  // method 3: P2P thủ công
+  manualHostStep2.style.display = 'none';
+  manualCreateBtn.style.display = '';
+  manualOfferCode.value = '';
+  manualAnswerInput.value = '';
+  manualGuestStep2.style.display = 'none';
+  manualJoinBtn.style.display = '';
+  manualOfferInput.value = '';
+  manualAnswerCode.value = '';
+  manualStatusEl.textContent = ''; manualStatusEl.className = 'hint online-status';
+}
+
+/* ---- method 1: mã phòng qua PeerJS (cần internet) ---- */
+const ROOM_PREFIX = 'caro5v17-';
+function randomRoomCode(){
+  return String(Math.floor(100000 + Math.random()*900000)); // 6 digits
+}
+function createRoom(){
+  onlineTeardown();
+  onlineRole = 'host';
+  connMethod = 'code';
+  createRoomBtn.disabled = true;
+  setConnStatus('Đang tạo phòng...', '');
+  attemptCreatePeer(0);
+}
+function attemptCreatePeer(tries){
+  const code = randomRoomCode();
+  let peer;
+  try{
+    peer = new Peer(ROOM_PREFIX + code);
+  }catch(err){
+    setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err');
+    return;
+  }
+  peerObj = peer;
+  peer.on('open', () => {
+    if(peerObj !== peer) return; // stale attempt (user switched away)
+    roomCodeDisplay.textContent = code;
+    hostStep2.style.display = '';
+    createRoomBtn.style.display = 'none';
+    setConnStatus('Đã tạo phòng. Đọc mã trên cho bạn của bạn, đang chờ họ vào phòng...', '');
+  });
+  peer.on('connection', conn => {
+    if(peerObj !== peer || transport) return;
+    onlineRole = 'host';
+    transport = {
+      send(o){ if(conn.open) conn.send(JSON.stringify(o)); },
+      isOpen(){ return conn.open; },
+      close(){ try{ conn.close(); }catch(e){} }
+    };
+    conn.on('open', onTransportOpen);
+    conn.on('close', onTransportClose);
+    conn.on('error', onTransportClose);
+    conn.on('data', data => { let m; try{ m = JSON.parse(data); }catch(e){ return; } handleOnlineMessage(m); });
+  });
+  peer.on('error', err => {
+    if(peerObj !== peer) return;
+    if(err.type === 'unavailable-id' && tries < 5){
+      attemptCreatePeer(tries+1); // code collision, very rare - just retry with a new one
+    } else {
+      createRoomBtn.disabled = false;
+      setConnStatus('Không tạo được phòng (' + err.type + '). Kiểm tra kết nối mạng và thử lại.', 'err');
+    }
+  });
+}
+function joinRoom(){
+  const code = guestCodeInput.value.trim();
+  if(!/^\d{6}$/.test(code)){
+    setConnStatus('Mã phòng gồm đúng 6 chữ số.', 'err');
+    return;
+  }
+  onlineTeardown();
+  onlineRole = 'guest';
+  connMethod = 'code';
+  joinRoomBtn.disabled = true;
+  setConnStatus('Đang kết nối...', '');
+  let peer;
+  try{
+    peer = new Peer();
+  }catch(err){
+    setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err');
+    return;
+  }
+  peerObj = peer;
+  peer.on('open', () => {
+    if(peerObj !== peer) return;
+    const conn = peer.connect(ROOM_PREFIX + code, {reliable:true});
+    transport = {
+      send(o){ if(conn.open) conn.send(JSON.stringify(o)); },
+      isOpen(){ return conn.open; },
+      close(){ try{ conn.close(); }catch(e){} }
+    };
+    conn.on('open', onTransportOpen);
+    conn.on('close', onTransportClose);
+    conn.on('error', onTransportClose);
+    conn.on('data', data => { let m; try{ m = JSON.parse(data); }catch(e){ return; } handleOnlineMessage(m); });
+  });
+  peer.on('error', err => {
+    if(peerObj !== peer) return;
+    joinRoomBtn.disabled = false;
+    if(err.type === 'peer-unavailable'){
+      setConnStatus('Không tìm thấy phòng với mã này. Kiểm tra lại mã.', 'err');
+    } else {
+      setConnStatus('Lỗi kết nối (' + err.type + '). Kiểm tra mạng và thử lại.', 'err');
+    }
+  });
+}
+
+/* ---- method 1b: "Ngẫu Nhiên" — auto-matchmaking, no code needed ----
+   Uses the exact same public PeerJS broker as "Mã Phòng", but instead of a
+   random 6-digit code, everyone searching races to claim one of a small
+   fixed set of rendezvous slot IDs. Whoever's connect() lands on a slot
+   someone else is already waiting on becomes the guest and the match
+   starts immediately; if every slot looks empty, the searcher claims the
+   first free one and waits there as host — exactly like a real matchmaking
+   queue, just without a dedicated matchmaking server. */
+const QM_PREFIX = ROOM_PREFIX + 'qm';
+const QM_SLOTS = 25;
+function quickMatchOrder(){
+  const arr = Array.from({length: QM_SLOTS}, (_, i) => i);
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function startQuickMatch(){
+  onlineTeardown();
+  onlineRole = null;
+  connMethod = 'code';
+  randomMatchBtn.style.display = 'none';
+  randomStep2.style.display = '';
+  setConnStatus('Đang tìm đối thủ ngẫu nhiên...', '');
+  const myToken = ++qmToken;
+  scanQuickMatchSlots(myToken, quickMatchOrder(), 0);
+}
+function scanQuickMatchSlots(token, order, idx){
+  if(token !== qmToken) return; // cancelled or reset while this step was pending
+  if(idx >= order.length){
+    // Scanned every slot and nobody's waiting — become the host ourselves.
+    hostQuickMatchSlot(token, order[Math.floor(Math.random() * order.length)], 0);
+    return;
+  }
+  let peer;
+  try{ peer = new Peer(); }catch(err){ setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err'); return; }
+  peerObj = peer;
+  let settled = false;
+  const giveUp = setTimeout(() => {
+    if(settled || token !== qmToken || peerObj !== peer) return;
+    settled = true;
+    try{ peer.destroy(); }catch(e){}
+    scanQuickMatchSlots(token, order, idx + 1);
+  }, 3500);
+  peer.on('open', () => {
+    if(token !== qmToken || peerObj !== peer) return;
+    const conn = peer.connect(QM_PREFIX + order[idx], {reliable: true});
+    conn.on('open', () => {
+      if(settled || token !== qmToken || peerObj !== peer) return;
+      settled = true;
+      clearTimeout(giveUp);
+      onlineRole = 'guest';
+      transport = {
+        send(o){ if(conn.open) conn.send(JSON.stringify(o)); },
+        isOpen(){ return conn.open; },
+        close(){ try{ conn.close(); }catch(e){} }
+      };
+      conn.on('close', onTransportClose);
+      conn.on('error', onTransportClose);
+      conn.on('data', data => { let m; try{ m = JSON.parse(data); }catch(e){ return; } handleOnlineMessage(m); });
+      onTransportOpen();
+      // Ultra-rare safety net: two searchers can land on the same slot back
+      // to back, so the host we reached may already be occupied and will
+      // silently ignore us (never sending 'start'). If that happens, stop
+      // waiting and keep searching instead of sitting frozen forever.
+      qmStartTimeout = setTimeout(() => {
+        if(token !== qmToken || localSymbol) return;
+        onlineTeardown();
+        setConnStatus('Phòng vừa bận, đang tìm đối thủ khác...', '');
+        scanQuickMatchSlots(token, quickMatchOrder(), 0);
+      }, 6000);
+    });
+  });
+  peer.on('error', err => {
+    if(settled || token !== qmToken || peerObj !== peer) return;
+    settled = true;
+    clearTimeout(giveUp);
+    try{ peer.destroy(); }catch(e){}
+    if(err.type === 'peer-unavailable'){
+      scanQuickMatchSlots(token, order, idx + 1); // slot empty, try the next one
+    } else {
+      setConnStatus('Lỗi kết nối (' + err.type + '). Kiểm tra mạng và thử lại.', 'err');
+      randomMatchBtn.style.display = '';
+      randomStep2.style.display = 'none';
+    }
+  });
+}
+function hostQuickMatchSlot(token, slot, tries){
+  if(token !== qmToken) return;
+  let peer;
+  try{ peer = new Peer(QM_PREFIX + slot); }catch(err){ setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err'); return; }
+  peerObj = peer;
+  peer.on('open', () => {
+    if(token !== qmToken || peerObj !== peer) return;
+    onlineRole = 'host';
+    setConnStatus('Đang chờ đối thủ ngẫu nhiên vào phòng...', '');
+  });
+  peer.on('connection', conn => {
+    if(token !== qmToken || peerObj !== peer || transport){ try{ conn.close(); }catch(e){} return; }
+    transport = {
+      send(o){ if(conn.open) conn.send(JSON.stringify(o)); },
+      isOpen(){ return conn.open; },
+      close(){ try{ conn.close(); }catch(e){} }
+    };
+    conn.on('open', onTransportOpen);
+    conn.on('close', onTransportClose);
+    conn.on('error', onTransportClose);
+    conn.on('data', data => { let m; try{ m = JSON.parse(data); }catch(e){ return; } handleOnlineMessage(m); });
+  });
+  peer.on('error', err => {
+    if(token !== qmToken || peerObj !== peer) return;
+    if(err.type === 'unavailable-id' && tries < QM_SLOTS){
+      hostQuickMatchSlot(token, (slot + 1) % QM_SLOTS, tries + 1); // lost the race for this slot, try the next
+    } else {
+      setConnStatus('Không tìm được trận (' + err.type + '). Thử lại sau.', 'err');
+      randomMatchBtn.style.display = '';
+      randomStep2.style.display = 'none';
+    }
+  });
+}
+
+/* ---- method 2: LAN, server.js chạy trên máy chủ phòng (không cần internet) ---- */
+function makeWsTransport(ws){
+  return {
+    send(o){ if(ws.readyState===WebSocket.OPEN) ws.send(JSON.stringify({type:'relay', payload: JSON.stringify(o)})); },
+    isOpen(){ return ws.readyState===WebSocket.OPEN; },
+    close(){ try{ ws.close(); }catch(e){} }
+  };
+}
+function lanCreateRoom(){
+  onlineTeardown();
+  onlineRole = 'host';
+  connMethod = 'lan';
+  lanCreateBtn.disabled = true;
+  setConnStatus('Đang kết nối tới server.js trên máy này...', '');
+  const port = (lanHostPort.value || '8787').trim();
+  const code = randomRoomCode();
+  let ws;
+  try{
+    ws = new WebSocket('ws://localhost:' + port);
+  }catch(err){
+    setConnStatus('Cổng không hợp lệ.', 'err');
+    lanCreateBtn.disabled = false;
+    return;
+  }
+  ws.onopen = () => ws.send(JSON.stringify({type:'create', code}));
+  ws.onerror = () => {
+    setConnStatus('Không kết nối được tới server.js trên máy này. Đã chạy lệnh "node server.js" chưa?', 'err');
+    lanCreateBtn.disabled = false;
+  };
+  ws.onclose = () => { if(!transport) lanCreateBtn.disabled = false; else onTransportClose(); };
+  ws.onmessage = e => {
+    let msg; try{ msg = JSON.parse(e.data); }catch(err){ return; }
+    if(msg.type === 'created'){
+      lanRoomCodeDisplay.textContent = code;
+      lanHostStep2.style.display = '';
+      lanCreateBtn.style.display = 'none';
+      setConnStatus('Đã tạo phòng. Đọc mã trên (kèm địa chỉ IP máy này) cho bạn của bạn.', '');
+    } else if(msg.type === 'error'){
+      lanCreateBtn.disabled = false;
+      setConnStatus('Lỗi: ' + msg.message, 'err');
+    } else if(msg.type === 'ready'){
+      transport = makeWsTransport(ws);
+      onlineRole = 'host';
+      onTransportOpen();
+    } else if(msg.type === 'relay'){
+      let payload; try{ payload = JSON.parse(msg.payload); }catch(err){ return; }
+      handleOnlineMessage(payload);
+    } else if(msg.type === 'peer-left'){
+      handlePeerLeft();
+    }
+  };
+}
+function lanJoinRoom(){
+  const ip = lanGuestIp.value.trim();
+  const port = (lanGuestPort.value || '8787').trim();
+  const code = lanGuestCode.value.trim();
+  if(!ip){ setConnStatus('Nhập địa chỉ IP máy chủ.', 'err'); return; }
+  if(!/^\d{6}$/.test(code)){ setConnStatus('Mã phòng gồm đúng 6 chữ số.', 'err'); return; }
+  onlineTeardown();
+  onlineRole = 'guest';
+  connMethod = 'lan';
+  lanJoinBtn.disabled = true;
+  setConnStatus('Đang kết nối...', '');
+  let ws;
+  try{
+    ws = new WebSocket('ws://' + ip + ':' + port);
+  }catch(err){
+    setConnStatus('Địa chỉ IP hoặc cổng không hợp lệ.', 'err');
+    lanJoinBtn.disabled = false;
+    return;
+  }
+  ws.onopen = () => ws.send(JSON.stringify({type:'join', code}));
+  ws.onerror = () => {
+    setConnStatus('Không kết nối được tới server. Kiểm tra lại IP/cổng và đảm bảo 2 máy cùng mạng LAN.', 'err');
+    lanJoinBtn.disabled = false;
+  };
+  ws.onclose = () => { if(!transport) lanJoinBtn.disabled = false; else onTransportClose(); };
+  ws.onmessage = e => {
+    let msg; try{ msg = JSON.parse(e.data); }catch(err){ return; }
+    if(msg.type === 'error'){
+      lanJoinBtn.disabled = false;
+      setConnStatus('Lỗi: ' + msg.message, 'err');
+    } else if(msg.type === 'ready'){
+      transport = makeWsTransport(ws);
+      onlineRole = 'guest';
+      onTransportOpen();
+    } else if(msg.type === 'relay'){
+      let payload; try{ payload = JSON.parse(msg.payload); }catch(err){ return; }
+      handleOnlineMessage(payload);
+    } else if(msg.type === 'peer-left'){
+      handlePeerLeft();
+    }
+  };
+}
+
+/* ---- method 3: P2P thủ công, tự copy/dán mã (không cần server, không cần internet ổn định) ---- */
+function rtcConfig(){
+  return { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+}
+function waitIceComplete(peer){
+  return new Promise(resolve => {
+    if(peer.iceGatheringState === 'complete'){ resolve(); return; }
+    function check(){
+      if(peer.iceGatheringState === 'complete'){
+        peer.removeEventListener('icegatheringstatechange', check);
+        resolve();
+      }
+    }
+    peer.addEventListener('icegatheringstatechange', check);
+    setTimeout(resolve, 3000); // safety fallback so a slow/blocked STUN never hangs the UI
+  });
+}
+function encodeSDP(desc){ return btoa(JSON.stringify(desc)); }
+function decodeSDP(str){ return JSON.parse(atob(str.trim())); }
+function makeRtcTransport(channel){
+  return {
+    send(o){ if(channel.readyState==='open') channel.send(JSON.stringify(o)); },
+    isOpen(){ return channel.readyState==='open'; },
+    close(){ try{ channel.close(); }catch(e){} }
+  };
+}
+async function manualCreateRoom(){
+  onlineTeardown();
+  onlineRole = 'host';
+  connMethod = 'manual';
+  setConnStatus('Đang tạo phòng...', '');
+  const localPc = new RTCPeerConnection(rtcConfig());
+  manualPc = localPc;
+  const channel = localPc.createDataChannel('game');
+  channel.onopen = () => { transport = makeRtcTransport(channel); onlineRole = 'host'; onTransportOpen(); };
+  channel.onclose = onTransportClose;
+  channel.onerror = onTransportClose;
+  channel.onmessage = e => { let m; try{ m = JSON.parse(e.data); }catch(err){ return; } handleOnlineMessage(m); };
+  try{
+    const offer = await localPc.createOffer();
+    await localPc.setLocalDescription(offer);
+    await waitIceComplete(localPc);
+    manualOfferCode.value = encodeSDP(localPc.localDescription);
+    manualHostStep2.style.display = '';
+    manualCreateBtn.style.display = 'none';
+    setConnStatus('Đã tạo mã. Gửi cho bạn của bạn, rồi dán mã trả lời họ gửi lại.', '');
+  }catch(err){
+    setConnStatus('Không tạo được phòng: ' + err.message, 'err');
+  }
+}
+async function manualConnect(){
+  if(!manualPc) return;
+  try{
+    const answer = decodeSDP(manualAnswerInput.value);
+    await manualPc.setRemoteDescription(answer);
+    setConnStatus('Đang kết nối...', '');
+  }catch(err){
+    setConnStatus('Mã trả lời không hợp lệ. Kiểm tra và dán đầy đủ.', 'err');
+  }
+}
+async function manualJoinRoom(){
+  try{
+    const offer = decodeSDP(manualOfferInput.value);
+    onlineTeardown();
+    onlineRole = 'guest';
+    connMethod = 'manual';
+    setConnStatus('Đang tạo mã trả lời...', '');
+    const localPc = new RTCPeerConnection(rtcConfig());
+    manualPc = localPc;
+    localPc.ondatachannel = e => {
+      const channel = e.channel;
+      channel.onopen = () => { transport = makeRtcTransport(channel); onlineRole = 'guest'; onTransportOpen(); };
+      channel.onclose = onTransportClose;
+      channel.onerror = onTransportClose;
+      channel.onmessage = ev => { let m; try{ m = JSON.parse(ev.data); }catch(err){ return; } handleOnlineMessage(m); };
+    };
+    await localPc.setRemoteDescription(offer);
+    const answer = await localPc.createAnswer();
+    await localPc.setLocalDescription(answer);
+    await waitIceComplete(localPc);
+    manualAnswerCode.value = encodeSDP(localPc.localDescription);
+    manualGuestStep2.style.display = '';
+    manualJoinBtn.style.display = 'none';
+    setConnStatus('Đã tạo mã trả lời. Gửi lại cho người tạo phòng và chờ họ kết nối.', '');
+  }catch(err){
+    setConnStatus('Mã phòng không hợp lệ. Kiểm tra và dán đầy đủ.', 'err');
+  }
+}
+
+/* ---- UI wiring ---- */
+connMethodRow.addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if(!btn) return;
+  [...connMethodRow.querySelectorAll('.pill')].forEach(p => p.classList.toggle('selected', p===btn));
+  connMethod = btn.dataset.value;
+  codeMethodPanel.style.display = connMethod==='code' ? '' : 'none';
+  lanMethodPanel.style.display = connMethod==='lan' ? '' : 'none';
+  manualMethodPanel.style.display = connMethod==='manual' ? '' : 'none';
+  resetOnlineConnection();
+});
+onlineRoleRow.addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if(!btn) return;
+  [...onlineRoleRow.querySelectorAll('.pill')].forEach(p => p.classList.toggle('selected', p===btn));
+  const role = btn.dataset.value;
+  hostPanel.style.display = role==='host' ? '' : 'none';
+  guestPanel.style.display = role==='guest' ? '' : 'none';
+  randomPanel.style.display = role==='random' ? '' : 'none';
+  resetOnlineConnection();
+});
+randomMatchBtn.addEventListener('click', startQuickMatch);
+cancelRandomBtn.addEventListener('click', resetOnlineConnection);
+lanRoleRow.addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if(!btn) return;
+  [...lanRoleRow.querySelectorAll('.pill')].forEach(p => p.classList.toggle('selected', p===btn));
+  const role = btn.dataset.value;
+  lanHostPanel.style.display = role==='host' ? '' : 'none';
+  lanGuestPanel.style.display = role==='guest' ? '' : 'none';
+  resetOnlineConnection();
+});
+manualRoleRow.addEventListener('click', e => {
+  const btn = e.target.closest('.pill');
+  if(!btn) return;
+  [...manualRoleRow.querySelectorAll('.pill')].forEach(p => p.classList.toggle('selected', p===btn));
+  const role = btn.dataset.value;
+  manualHostPanel.style.display = role==='host' ? '' : 'none';
+  manualGuestPanel.style.display = role==='guest' ? '' : 'none';
+  resetOnlineConnection();
+});
+createRoomBtn.addEventListener('click', createRoom);
+joinRoomBtn.addEventListener('click', joinRoom);
+copyRoomCodeBtn.addEventListener('click', () => copyText(roomCodeDisplay.textContent));
+guestCodeInput.addEventListener('input', () => { guestCodeInput.value = guestCodeInput.value.replace(/\D/g,'').slice(0,6); });
+guestCodeInput.addEventListener('keydown', e => { if(e.key==='Enter') joinRoom(); });
+
+lanCreateBtn.addEventListener('click', lanCreateRoom);
+lanJoinBtn.addEventListener('click', lanJoinRoom);
+lanGuestCode.addEventListener('input', () => { lanGuestCode.value = lanGuestCode.value.replace(/\D/g,'').slice(0,6); });
+lanGuestCode.addEventListener('keydown', e => { if(e.key==='Enter') lanJoinRoom(); });
+/* ---- server.js source for method 2 (LAN, no internet needed) ----
+   A tiny WebSocket relay: matches a "create" and a "join" by 6-digit room
+   code, then simply forwards {type:'relay', payload} messages between the
+   two sockets. Needs the `ws` package (npm install ws) since hand-rolling
+   the WebSocket protocol is fragile — everything else is Node built-ins. */
+const SERVER_JS_SOURCE = `// Caro 5 - LAN Room Server
+// Cach dung:
+//   1) Cai Node.js neu chua co: https://nodejs.org
+//   2) Mo Command Prompt / Terminal tai thu muc chua file server.js nay
+//   3) Chay:  npm install ws
+//   4) Chay:  node server.js [port]      (port mac dinh la 8787)
+//   5) Tren trinh duyet (may nay), chon ONLINE (LAN) > LAN SERVER (NODE.JS) > TAO PHONG
+//   6) May con lai nhap dung dia chi IP cua may nay + cong + ma phong de VAO PHONG
+
+const WebSocket = require('ws');
+const PORT = parseInt(process.argv[2], 10) || 8787;
+const wss = new WebSocket.Server({ port: PORT });
+const rooms = new Map(); // code -> { host: ws|null, guest: ws|null }
+
+function safeSend(ws, obj){
+  if(ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+}
+
+wss.on('connection', ws => {
+  let joinedCode = null;
+  let role = null;
+
+  ws.on('message', raw => {
+    let msg;
+    try{ msg = JSON.parse(raw); }catch(e){ return; }
+
+    if(msg.type === 'create'){
+      const code = String(msg.code || '');
+      if(!/^\\d{6}$/.test(code)){ safeSend(ws, {type:'error', message:'Ma phong khong hop le.'}); return; }
+      if(rooms.has(code)){ safeSend(ws, {type:'error', message:'Ma phong da ton tai, thu lai.'}); return; }
+      rooms.set(code, { host: ws, guest: null });
+      joinedCode = code; role = 'host';
+      safeSend(ws, {type:'created'});
+      return;
+    }
+
+    if(msg.type === 'join'){
+      const code = String(msg.code || '');
+      const room = rooms.get(code);
+      if(!room){ safeSend(ws, {type:'error', message:'Khong tim thay phong voi ma nay.'}); return; }
+      if(room.guest){ safeSend(ws, {type:'error', message:'Phong da co 2 nguoi choi.'}); return; }
+      room.guest = ws;
+      joinedCode = code; role = 'guest';
+      safeSend(room.host, {type:'ready'});
+      safeSend(room.guest, {type:'ready'});
+      return;
+    }
+
+    if(msg.type === 'relay' && joinedCode){
+      const room = rooms.get(joinedCode);
+      if(!room) return;
+      const other = role === 'host' ? room.guest : room.host;
+      safeSend(other, {type:'relay', payload: msg.payload});
+      return;
+    }
+  });
+
+  ws.on('close', () => {
+    if(!joinedCode) return;
+    const room = rooms.get(joinedCode);
+    if(!room) return;
+    if(role === 'host'){
+      safeSend(room.guest, {type:'peer-left'});
+      rooms.delete(joinedCode);
+    } else if(role === 'guest'){
+      safeSend(room.host, {type:'peer-left'});
+      room.guest = null;
+    }
+  });
+});
+
+console.log('Caro 5 LAN server dang chay tai cong ' + PORT);
+console.log('May khac trong cung mang LAN: chon ONLINE (LAN) > LAN SERVER, nhap dia chi IP may nay + cong ' + PORT + ' + ma phong de vao.');
+`;
+
+downloadServerBtn.addEventListener('click', () => {
+  const blob = new Blob([SERVER_JS_SOURCE], {type:'text/javascript'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'server.js';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+});
+
+manualCreateBtn.addEventListener('click', manualCreateRoom);
+manualConnectBtn.addEventListener('click', manualConnect);
+manualJoinBtn.addEventListener('click', manualJoinRoom);
+manualCopyOfferBtn.addEventListener('click', () => copyText(manualOfferCode.value));
+manualCopyAnswerBtn.addEventListener('click', () => copyText(manualAnswerCode.value));
+
+settingsBtn.addEventListener('click', () => {
+  if(gameOver){ returnToMenu(); return; } // no active game to pause - go straight to setup
+  pauseGame(); // show the Tiếp Tục / Trở Về Menu overlay - same for AI/PvP/Online
+});
+
+/* ============ GAME SETUP ============ */
+function startGame(){
+  resetOnlineConnection();
+  hideResultPanel();
+  SIZE = parseInt(cfg.size, 10);
+  resizeCanvas();
+  board = Array.from({length:SIZE}, () => Array(SIZE).fill(null));
+  history = [];
+  reviewIndex = 0;
+  gameOver = false;
+  winLine = null;
+  aiThinking = false;
+  paused = false;
+  pausedByPeer = false;
+  if(aiTimeoutId){ clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+  pauseOverlay.classList.add('hidden');
+  current = 'X';
+  if(cfg.vs === 'ai' && cfg.first === 'ai'){ humanSym='O'; aiSym='X'; } else { humanSym='X'; aiSym='O'; }
+  cursor = {r: Math.floor(SIZE/2), c: Math.floor(SIZE/2)};
+  centerCamera(cursor.r, cursor.c);
+  updateZoomLabel();
+  updateHud();
+  resetTimer();
+  overlay.classList.add('hidden');
+  setHudVisible(true);
+  draw();
+  if(cfg.vs === 'ai' && current === aiSym){
+    aiThinking = true;
+    aiTimeoutId = setTimeout(() => { aiTimeoutId = null; aiTurn(); }, 400);
+  }
+}
+
+function centerCamera(r,c){
+  camX = c*CELL + CELL/2 - W()/2;
+  camY = r*CELL + CELL/2 - H()/2;
+  clampCamera();
+}
+function clampCamera(){
+  // When the board (SIZE*CELL) is smaller than the canvas — which happens once
+  // "Ô hiển thị" (visibleCells) is set larger than the board size, e.g. > 13
+  // on a 13x13 board — the old code forced camX/camY to 0, pinning the whole
+  // board into the top-left corner and leaving the rest of the canvas blank.
+  // Instead, center the board inside the viewport in that case.
+  const spanX = SIZE*CELL - W();
+  const spanY = SIZE*CELL - H();
+  camX = spanX <= 0 ? spanX/2 : Math.min(Math.max(camX,0), spanX);
+  camY = spanY <= 0 ? spanY/2 : Math.min(Math.max(camY,0), spanY);
+}
+
+/* ============ REVIEW MODE (after game ends) ============ */
+let reviewIndex = 0;      // how many moves from history are shown
+let reviewing = false;    // true once the result panel is open
+
+function getDisplayState(){
+  if(!reviewing || reviewIndex >= history.length){
+    return {b: board, win: winLine, lastCell: history.length ? history[history.length-1] : null};
+  }
+  const b = Array.from({length:SIZE}, () => Array(SIZE).fill(null));
+  for(let i=0;i<reviewIndex;i++){ const m = history[i]; b[m.r][m.c] = m.player; }
+  return {b, win: null, lastCell: reviewIndex>0 ? history[reviewIndex-1] : null};
+}
+
+/* ============ RENDER ============ */
+function draw(){
+  ctx.clearRect(0,0,W(),H());
+  ctx.strokeStyle = getCss('--grid-line');
+  ctx.lineWidth = 1;
+  const startCol = Math.max(0, Math.floor(camX/CELL));
+  const endCol = Math.min(SIZE, Math.ceil((camX+W())/CELL));
+  const startRow = Math.max(0, Math.floor(camY/CELL));
+  const endRow = Math.min(SIZE, Math.ceil((camY+H())/CELL));
+
+  for(let c=startCol;c<=endCol;c++){
+    const x = c*CELL - camX + 0.5;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H()); ctx.stroke();
+  }
+  for(let r=startRow;r<=endRow;r++){
+    const y = r*CELL - camY + 0.5;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W(),y); ctx.stroke();
+  }
+
+  const xColor = getCss('--x-color'), oColor = getCss('--o-color');
+  const rad = CELL*0.32;
+  const disp = getDisplayState();
+  for(let r=startRow;r<endRow;r++){
+    const rowArr = disp.b[r];
+    if(!rowArr) continue;
+    for(let c=startCol;c<endCol;c++){
+      const v = rowArr[c];
+      if(!v) continue;
+      const cx = c*CELL - camX + CELL/2;
+      const cy = r*CELL - camY + CELL/2;
+      const onWin = disp.win && disp.win.some(([wr,wc]) => wr===r && wc===c);
+      const isLast = disp.lastCell && disp.lastCell.r===r && disp.lastCell.c===c;
+      ctx.save();
+      if(onWin){ ctx.shadowColor = getCss('--win-color'); ctx.shadowBlur = Math.max(6, CELL*0.25); }
+      if(v==='X'){
+        ctx.strokeStyle = xColor; ctx.lineWidth = Math.max(2, CELL*0.1); ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(cx-rad,cy-rad); ctx.lineTo(cx+rad,cy+rad);
+        ctx.moveTo(cx+rad,cy-rad); ctx.lineTo(cx-rad,cy+rad); ctx.stroke();
+      } else {
+        ctx.strokeStyle = oColor; ctx.lineWidth = Math.max(2, CELL*0.1);
+        ctx.beginPath(); ctx.arc(cx,cy,rad,0,Math.PI*2); ctx.stroke();
+      }
+      ctx.restore();
+      if(isLast && reviewing){
+        ctx.save();
+        ctx.strokeStyle = getCss('--win-color');
+        ctx.lineWidth = 2;
+        ctx.strokeRect(cx-CELL*0.42, cy-CELL*0.42, CELL*0.84, CELL*0.84);
+        ctx.restore();
+      }
+    }
+  }
+  // win line: a single glowing line through the 5 winning cells
+  if(disp.win && disp.win.length){
+    const sorted = [...disp.win].sort((a,b) => a[0]-b[0] || a[1]-b[1]);
+    const [r1,c1] = sorted[0];
+    const [r2,c2] = sorted[sorted.length-1];
+    const x1 = c1*CELL - camX + CELL/2, y1 = r1*CELL - camY + CELL/2;
+    const x2 = c2*CELL - camX + CELL/2, y2 = r2*CELL - camY + CELL/2;
+    ctx.save();
+    ctx.globalAlpha = 0.85;
+    ctx.strokeStyle = getCss('--win-color');
+    ctx.lineWidth = Math.max(3, CELL*0.14);
+    ctx.lineCap = 'round';
+    ctx.shadowColor = getCss('--win-color');
+    ctx.shadowBlur = Math.max(10, CELL*0.4);
+    ctx.beginPath();
+    ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.stroke();
+    ctx.restore();
+  }
+  // cursor highlight
+  if(!gameOver){
+    const cx = cursor.c*CELL - camX, cy = cursor.r*CELL - camY;
+    if(cx > -CELL && cx < W() && cy > -CELL && cy < H()){
+      ctx.strokeStyle = getCss('--win-color');
+      ctx.lineWidth = 2;
+      ctx.strokeRect(cx+2, cy+2, CELL-4, CELL-4);
+    }
+  }
+}
+function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+/* ============ HUD ============ */
+function updateHud(){
+  turnLabel.textContent = 'Lượt: ' + current;
+  moveCountEl.textContent = 'Nước đi: ' + history.length;
+  scoreboard.innerHTML = `<span>X <b>${scores.X||0}</b></span><span>O <b>${scores.O||0}</b></span>`;
+  undoBtn.disabled = history.length===0 || aiThinking || gameOver || paused || cfg.vs==='online';
+  if(undoBtn.disabled && document.activeElement===undoBtn) undoBtn.blur();
+  pauseBtn.disabled = gameOver || pausedByPeer;
+  pauseBtn.innerHTML = paused ? '<span class="icn-play"></span>' : '<span class="icn-pause"><i></i><i></i></span>';
+  pauseBtn.title = pausedByPeer ? 'Đối thủ đang tạm dừng' : (paused ? 'Tiếp tục (F11)' : 'Tạm dừng (F11)');
+}
+function updateZoomLabel(){
+  const disp = Math.round(visibleCells); // visibleCells can be fractional mid-pinch; display rounded
+  zoomLabel.textContent = 'Vùng: ' + disp + '×' + disp;
+  viewSizeVal.textContent = disp + '×' + disp;
+  viewSizeSlider.value = disp;
+  zoomInBtn.disabled = visibleCells<=VIS_MIN;
+  zoomOutBtn.disabled = visibleCells>=VIS_MAX;
+}
+function setVisibleCells(n){
+  visibleCells = Math.min(VIS_MAX, Math.max(VIS_MIN, Math.round(n)));
+  CELL = W() / visibleCells;
+  updateZoomLabel();
+  clampCamera();
+  draw();
+  scheduleSaveSettings();
+}
+/* Zoom in/out anchored at a canvas point (anchorX,anchorY in backing-store px)
+   so the board point under the mouse/pinch-center stays fixed - used by the
+   mouse wheel and by pinch-to-zoom. targetVisible may be fractional so pinch
+   feels continuous; buttons/slider still snap to integers via setVisibleCells. */
+function zoomToward(anchorX, anchorY, targetVisible){
+  const clamped = Math.min(VIS_MAX, Math.max(VIS_MIN, targetVisible));
+  const oldCELL = CELL;
+  const boardX = anchorX + camX, boardY = anchorY + camY;
+  const cellX = boardX / oldCELL, cellY = boardY / oldCELL;
+  visibleCells = clamped;
+  CELL = W() / visibleCells;
+  camX = cellX*CELL - anchorX;
+  camY = cellY*CELL - anchorY;
+  clampCamera();
+  updateZoomLabel();
+  draw();
+  scheduleSaveSettings();
+}
+function snapVisibleCells(){
+  setVisibleCells(Math.round(visibleCells));
+}
+
+/* ============ TIMER ============ */
+function tickTimer(){
+  if(gameOver || paused) { clearInterval(timerInterval); return; }
+  timeLeft--;
+  timerTag.textContent = '⏱ ' + Math.max(timeLeft,0) + 's';
+  if(timeLeft <= 0){
+    clearInterval(timerInterval);
+    sfxTimeout();
+    // auto-play a reasonable move for whoever's turn timed out
+    if(cfg.vs==='ai' && current===aiSym) return; // ai handles itself
+    if(cfg.vs==='online' && current!==localSymbol) return; // only the timed-out side plays its own fallback move
+    const mv = pickFallbackMove(current);
+    if(mv) applyMove(mv.r, mv.c);
+  }
+}
+function resetTimer(){
+  clearInterval(timerInterval);
+  if(cfg.time === 'inf'){ timerTag.textContent = '⏱ ∞'; return; }
+  timeLeft = parseInt(cfg.time,10);
+  timerTag.textContent = '⏱ ' + timeLeft + 's';
+  if(paused) return; // don't start ticking while paused; resumeGame() restarts it
+  timerInterval = setInterval(tickTimer, 1000);
+}
+
+/* ============ PAUSE / RESUME ============
+   Pausing freezes the countdown (timeLeft is preserved, not reset), cancels
+   any pending AI-move timeout so the AI can't move while paused, and blocks
+   placing stones (canPlayerAct checks `paused`). Resuming restarts the
+   countdown from the frozen timeLeft and, if it was the AI's turn, re-queues
+   its move. Toggle with the pause button or the "F11" key.
+
+   In online mode, pause/resume is synced to the peer via {type:'pause'} /
+   {type:'resume'} messages so neither side is left staring at a ticking
+   clock while the other has silently stepped away. `pausedByPeer` marks a
+   pause that arrived from the network rather than being started locally —
+   only the side that started a pause can end it, so the other side just
+   sees a "waiting" notice with a way to leave, not a Tiếp Tục button. */
+let pausedByPeer = false;
+function pauseGame(silent){
+  if(gameOver || paused) return;
+  if(overlay && !overlay.classList.contains('hidden')) return; // setup/settings open, nothing to pause
+  paused = true;
+  pausedByPeer = !!silent;
+  clearInterval(timerInterval);
+  if(aiTimeoutId){ clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+  if(cfg.vs==='online' && !silent && onlineIsOpen()){
+    onlineSend({type:'pause'});
+  }
+  updatePauseOverlayContent();
+  pauseOverlay.classList.remove('hidden');
+  updateHud();
+  draw();
+}
+function resumeGame(silent){
+  if(!paused) return;
+  if(pausedByPeer && !silent) return; // can't end a pause the other side started
+  paused = false;
+  pausedByPeer = false;
+  pauseOverlay.classList.add('hidden');
+  if(cfg.time !== 'inf'){
+    clearInterval(timerInterval);
+    timerInterval = setInterval(tickTimer, 1000);
+  }
+  if(cfg.vs==='ai' && current===aiSym && !gameOver && aiThinking){
+    aiTimeoutId = setTimeout(() => { aiTimeoutId = null; aiTurn(); }, 350);
+  }
+  if(cfg.vs==='online' && !silent && onlineIsOpen()){
+    onlineSend({type:'resume'});
+  }
+  updateHud();
+  draw();
+}
+function updatePauseOverlayContent(){
+  const titleEl = pauseOverlay.querySelector('h2');
+  const subEl = pauseOverlay.querySelector('.sub');
+  if(pausedByPeer){
+    titleEl.textContent = 'ĐỐI THỦ TẠM DỪNG';
+    subEl.textContent = 'Đối thủ đang tạm dừng ván đấu — vui lòng chờ, hoặc bấm "Trở Về Menu" để thoát.';
+    resumeBtn.style.display = 'none';
+  } else {
+    titleEl.textContent = 'TẠM DỪNG';
+    subEl.textContent = 'Ván đấu đang tạm dừng — thời gian và bàn cờ được giữ nguyên.';
+    resumeBtn.style.display = '';
+  }
+}
+function togglePause(){
+  if(overlay && !overlay.classList.contains('hidden')) return;
+  if(gameOver) return;
+  if(pausedByPeer) return; // waiting on the other side, nothing local F11/button can do but leave
+  if(paused) resumeGame(); else pauseGame();
+}
+pauseBtn.addEventListener('click', togglePause);
+resumeBtn.addEventListener('click', () => resumeGame());
+menuBtn.addEventListener('click', returnToMenu);
+pauseOverlay.addEventListener('click', e => { if(e.target === pauseOverlay) resumeGame(); });
+
+/* Abandons the current match and returns to the setup screen. Used by the
+   "Trở Về Menu" button (from the pause overlay, or directly from the
+   settings gear once a game has already ended). */
+function returnToMenu(){
+  paused = false;
+  pausedByPeer = false;
+  gameOver = true;
+  aiThinking = false;
+  clearInterval(timerInterval);
+  if(aiTimeoutId){ clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+  if(cfg.vs==='online' && onlineIsOpen()){
+    try{ onlineSend({type:'bye'}); }catch(e){}
+  }
+  resetOnlineConnection();
+  hideResultPanel();
+  pauseOverlay.classList.add('hidden');
+  setHudVisible(false);
+  overlay.querySelector('h2').textContent = 'CÀI ĐẶT';
+  overlay.querySelector('.sub').textContent = 'Chỉnh lại tuỳ chọn rồi bắt đầu ván mới.';
+  overlay.classList.remove('hidden');
+  resetOverlayScroll();
+  requestAnimationFrame(resetOverlayScroll);
+  draw();
+}
+
+/* ============ MOVE APPLICATION ============ */
+function applyMove(r,c,fromNetwork){
+  if(gameOver || board[r][c]) return;
+  if(cfg.vs==='online' && !fromNetwork && onlineIsOpen()){
+    onlineSend({type:'move', r, c});
+  }
+  board[r][c] = current;
+  sfxMove(current);
+  vibrate(15);
+  history.push({r,c,player:current});
+  cursor = {r,c};
+  const line = checkWin(r,c,current);
+  updateHud();
+  if(line){
+    endGame(current, line);
+    draw();
+    return;
+  }
+  if(history.length === SIZE*SIZE){
+    endGame(null, null);
+    draw();
+    return;
+  }
+  current = current==='X' ? 'O' : 'X';
+  updateHud();
+  resetTimer();
+  draw();
+  if(cfg.vs==='ai' && current===aiSym && !gameOver){
+    aiThinking = true;
+    updateHud();
+    aiTimeoutId = setTimeout(() => { aiTimeoutId = null; aiTurn(); }, 350 + Math.random()*300);
+  }
+}
+
+function endGame(winner, line){
+  gameOver = true;
+  paused = false;
+  pauseOverlay.classList.add('hidden');
+  clearInterval(timerInterval);
+  if(aiTimeoutId){ clearTimeout(aiTimeoutId); aiTimeoutId = null; }
+  winLine = line;
+  aiThinking = false;
+  if(winner){
+    scores[winner] = (scores[winner]||0)+1;
+    saveScores();
+    sfxWin();
+    vibrate([30,40,30,40,80]);
+  } else {
+    sfxDraw();
+    vibrate(60);
+  }
+  updateHud();
+  reviewIndex = history.length;
+  reviewing = true;
+  showResultPanel(winner);
+}
+
+/* ============ RESULT PANEL (shown after a game ends, board stays visible) ============ */
+let resultPanelEl = null;
+function buildResultPanel(){
+  if(resultPanelEl) return resultPanelEl;
+  const el = document.createElement('div');
+  el.id = 'resultPanel';
+  el.style.cssText = 'position:fixed;top:10px;right:10px;max-width:220px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:12px 13px;box-shadow:0 8px 26px rgba(0,0,0,.5);display:none;font-family:inherit;z-index:1200;';
+  el.innerHTML = `
+    <div class="rp-handle" title="Kéo để di chuyển"><span></span></div>
+    <div id="rpTitle" style="font-weight:900;letter-spacing:2px;font-size:14px;color:var(--win-color);margin-bottom:3px;"></div>
+    <div id="rpSub" style="font-size:10.5px;color:var(--text-dim);line-height:1.5;margin-bottom:9px;"></div>
+    <div id="rpMoveLabel" style="font-size:10px;color:var(--text-dim);text-align:center;margin-bottom:6px;">Nước 0/0</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:9px;">
+      <button id="rpPrev" class="icon-btn" style="width:26px;height:26px;font-size:12px;" title="Nước trước">◀</button>
+      <button id="rpPlay" class="icon-btn" style="width:30px;height:26px;font-size:13px;" title="Tự động tua"><span class="icn-play"></span></button>
+      <button id="rpNext" class="icon-btn" style="width:26px;height:26px;font-size:12px;" title="Nước sau">▶</button>
+      <button id="rpSpeed" class="icon-btn" style="width:36px;height:26px;font-size:10px;" title="Tốc độ tua">1×</button>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button id="rpReplay" class="primary" style="flex:1;padding:7px 4px;font-size:10.5px;letter-spacing:1.5px;">CHƠI LẠI</button>
+      <button id="rpEnd" class="icon-btn" style="flex:1;width:auto;font-size:10.5px;letter-spacing:1px;">KẾT THÚC</button>
+    </div>`;
+  // Attached to <body> (not board-wrap) with position:fixed, so it is free to
+  // be dragged outside the board's edges instead of being clipped by
+  // board-wrap's overflow:hidden.
+  document.body.appendChild(el);
+  resultPanelEl = el;
+  el.querySelector('#rpPrev').addEventListener('click', () => { stopReplay(); reviewIndex = Math.max(0, reviewIndex-1); updateReviewUI(); });
+  el.querySelector('#rpNext').addEventListener('click', () => { stopReplay(); reviewIndex = Math.min(history.length, reviewIndex+1); updateReviewUI(); });
+  el.querySelector('#rpPlay').addEventListener('click', toggleReplayPlay);
+  el.querySelector('#rpSpeed').addEventListener('click', cycleReplaySpeed);
+  el.querySelector('#rpReplay').addEventListener('click', () => { hideResultPanel(); startGame(); });
+  el.querySelector('#rpEnd').addEventListener('click', () => { hideResultPanel(); returnToMenu(); });
+  makeResultPanelDraggable(el, el.querySelector('.rp-handle'));
+  return el;
+}
+
+/* ============ DRAG-TO-MOVE RESULT PANEL ============
+   The panel sits on top of the board and can hide the very cells the player
+   wants to review, so it can be grabbed by its handle (the small bar at the
+   top) and dragged anywhere on screen — including fully outside the board —
+   so the board underneath is never permanently blocked. It's clamped only
+   enough to keep a corner reachable, never fully lost off-screen.
+   pointermove/pointerup are bound to `document`, not to the small handle
+   itself: some WebViews (older Android system WebView, some in-app browsers)
+   don't implement setPointerCapture reliably, and a handle-only listener
+   would silently stop receiving events the moment a fast drag slips the
+   pointer off that ~34px bar — making the drag look like it "freezes" or
+   breaks mid-gesture. Binding to `document` and gating by dragId keeps the
+   drag going regardless of exactly where the pointer is. */
+function makeResultPanelDraggable(el, handle){
+  let dragId = null, offX = 0, offY = 0;
+  const EDGE = 28; // px of the panel that must stay reachable on-screen
+  handle.addEventListener('pointerdown', e => {
+    dragId = e.pointerId;
+    el.classList.add('dragging');
+    const elRect = el.getBoundingClientRect();
+    offX = e.clientX - elRect.left;
+    offY = e.clientY - elRect.top;
+    // switch from right-anchored to left/top-anchored (viewport px) so it
+    // can move freely, including past the board's own boundaries
+    el.style.left = elRect.left + 'px';
+    el.style.top = elRect.top + 'px';
+    el.style.right = 'auto';
+    e.preventDefault();
+  });
+  document.addEventListener('pointermove', e => {
+    if(dragId === null || dragId !== e.pointerId) return;
+    let x = e.clientX - offX;
+    let y = e.clientY - offY;
+    const w = el.offsetWidth, h = el.offsetHeight;
+    x = Math.min(Math.max(x, EDGE - w), window.innerWidth - EDGE);
+    y = Math.min(Math.max(y, EDGE - h), window.innerHeight - EDGE);
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+  });
+  function endDrag(e){
+    if(dragId === null || dragId !== e.pointerId) return;
+    dragId = null;
+    el.classList.remove('dragging');
+  }
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
+}
+
+/* ============ REPLAY AUTO-PLAY (fast-forward / slow-motion through history) ============ */
+let replayTimer = null;
+let replaySpeed = 1;
+const REPLAY_BASE_MS = 650;
+function replayStep(){
+  reviewIndex++;
+  if(reviewIndex >= history.length){
+    reviewIndex = history.length;
+    stopReplay();
+  }
+  updateReviewUI();
+}
+function toggleReplayPlay(){
+  if(replayTimer){ stopReplay(); return; }
+  if(reviewIndex >= history.length){
+    // Restarting from the end: reset immediately and refresh the label,
+    // prev/next button state, and the board itself right away — otherwise
+    // they all keep showing the final position (e.g. "Nước 9/9") until the
+    // first interval tick fires, which can be up to 650ms later (longer at
+    // 0.5×), making Play look like it did nothing / froze when first pressed.
+    reviewIndex = 0;
+    updateReviewUI();
+  }
+  const el = buildResultPanel();
+  el.querySelector('#rpPlay').innerHTML = '<span class="icn-pause"><i></i><i></i></span>';
+  replayTimer = setInterval(replayStep, REPLAY_BASE_MS / replaySpeed);
+}
+function cycleReplaySpeed(){
+  const speeds = [0.5, 1, 2, 4];
+  replaySpeed = speeds[(speeds.indexOf(replaySpeed)+1) % speeds.length];
+  const el = buildResultPanel();
+  el.querySelector('#rpSpeed').textContent = replaySpeed + '×';
+  if(replayTimer){
+    clearInterval(replayTimer);
+    replayTimer = setInterval(replayStep, REPLAY_BASE_MS / replaySpeed);
+  }
+}
+function stopReplay(){
+  if(replayTimer){ clearInterval(replayTimer); replayTimer = null; }
+  if(resultPanelEl){
+    const btn = resultPanelEl.querySelector('#rpPlay');
+    if(btn) btn.innerHTML = '<span class="icn-play"></span>';
+  }
+}
+function updateReviewUI(){
+  const el = buildResultPanel();
+  el.querySelector('#rpMoveLabel').textContent = `Nước ${reviewIndex}/${history.length}`;
+  el.querySelector('#rpPrev').disabled = reviewIndex<=0;
+  el.querySelector('#rpNext').disabled = reviewIndex>=history.length;
+  draw();
+}
+function showResultPanel(winner, opts){
+  opts = opts || {};
+  const el = buildResultPanel();
+  // always reappear anchored to the board's top-right corner, even if the
+  // player dragged it elsewhere (possibly off the board) during a previous
+  // game's review. Computed from board-wrap's rect since the panel is now
+  // fixed to the viewport, not to board-wrap, so it can be dragged past it.
+  const wrapRect = boardWrap.getBoundingClientRect();
+  el.style.left = 'auto';
+  el.style.top = (wrapRect.top + 10) + 'px';
+  el.style.right = (window.innerWidth - wrapRect.right + 10) + 'px';
+  el.querySelector('#rpTitle').textContent = opts.title || (winner ? (winner + ' THẮNG!') : 'HOÀ CỜ');
+  el.querySelector('#rpSub').textContent = opts.sub || (winner
+    ? `${winner} đã xếp đủ 5 quân liên tiếp. Kéo thanh phía trên để di chuyển bảng này, dùng ◀ ▶ để xem lại từng nước.`
+    : 'Bàn cờ đã đầy, không ai thắng. Kéo thanh phía trên để di chuyển bảng này, dùng ◀ ▶ để xem lại từng nước.');
+  el.style.display = 'block';
+  updateReviewUI();
+}
+function hideResultPanel(){
+  reviewing = false;
+  stopReplay();
+  if(resultPanelEl) resultPanelEl.style.display = 'none';
+}
+
+/* ============ WIN CHECK ============ */
+const DIRS = [[1,0],[0,1],[1,1],[1,-1]];
+function inBounds(r,c){ return r>=0 && r<SIZE && c>=0 && c<SIZE; }
+function checkWin(r,c,p){
+  for(const [dr,dc] of DIRS){
+    let cells = [[r,c]];
+    let rr=r+dr, cc=c+dc;
+    while(inBounds(rr,cc) && board[rr][cc]===p){ cells.push([rr,cc]); rr+=dr; cc+=dc; }
+    rr=r-dr; cc=c-dc;
+    while(inBounds(rr,cc) && board[rr][cc]===p){ cells.push([rr,cc]); rr-=dr; cc-=dc; }
+    if(cells.length>=5) return cells;
+  }
+  return null;
+}
+
+/* ============ AI ENGINE ============ */
+/* Pattern scoring table: built from a 9-wide window centred on the candidate
+   cell for each of the 4 directions. 'S' = own stone, '.' = empty, '#' = wall/opponent. */
+const PATTERNS = [
+  {re:/SSSSS/, score:1000000},
+  {re:/\.SSSS\./, score:60000},
+  {re:/SSSS\./, score:9000},
+  {re:/\.SSSS/, score:9000},
+  {re:/S\.SSS/, score:9000},
+  {re:/SSS\.S/, score:9000},
+  {re:/SS\.SS/, score:9500},
+  {re:/\.SSS\.\./, score:2200},
+  {re:/\.\.SSS\./, score:2200},
+  {re:/\.SSS\./, score:2400},
+  {re:/\.S\.SS\./, score:1300},
+  {re:/\.SS\.S\./, score:1300},
+  {re:/SSS\./, score:320},
+  {re:/\.SSS/, score:320},
+  {re:/S\.SS/, score:260},
+  {re:/SS\.S/, score:260},
+  {re:/\.SS\./, score:160},
+  {re:/SS\./, score:45},
+  {re:/\.SS/, score:45},
+  {re:/S\.S/, score:10}
+];
+function patternScore(str){
+  let best = 0;
+  for(const p of PATTERNS) if(p.re.test(str)) best = Math.max(best, p.score);
+  return best;
+}
+function buildWindow(r,c,dr,dc,player){
+  let s = '';
+  for(let i=-4;i<=4;i++){
+    const rr=r+dr*i, cc=c+dc*i;
+    if(!inBounds(rr,cc)) s+='#';
+    else if(rr===r && cc===c) s+='S';
+    else if(board[rr][cc]===null) s+='.';
+    else if(board[rr][cc]===player) s+='S';
+    else s+='#';
+  }
+  return s;
+}
+/* Evaluate placing `player` at (r,c). Returns {score, threats} where threats
+   is how many directions independently reach open-three level (>=1800) —
+   used to catch double-three / double-four combos. */
+function evalCell(r,c,player){
+  if(board[r][c] !== null) return {score:-1, threats:0};
+  let total = 0, threats = 0;
+  for(const [dr,dc] of DIRS){
+    const s = buildWindow(r,c,dr,dc,player);
+    const sc = patternScore(s);
+    total += sc;
+    if(sc >= 1800) threats++;
+  }
+  if(threats >= 2) total += 8000; // double-threat bonus (e.g. double open three)
+  return {score:total, threats};
+}
+
+function getCandidates(){
+  if(history.length===0) return [{r:Math.floor(SIZE/2), c:Math.floor(SIZE/2)}];
+  const seen = new Set();
+  const out = [];
+  const radius = 2;
+  for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++){
+    if(!board[r][c]) continue;
+    for(let dr=-radius;dr<=radius;dr++) for(let dc=-radius;dc<=radius;dc++){
+      const rr=r+dr, cc=c+dc;
+      if(!inBounds(rr,cc) || board[rr][cc]) continue;
+      const key = rr+'_'+cc;
+      if(!seen.has(key)){ seen.add(key); out.push({r:rr,c:cc}); }
+    }
+  }
+  return out;
+}
+
+function pickFallbackMove(player){
+  const cands = getCandidates();
+  if(!cands.length) return null;
+  const center = Math.floor(SIZE/2);
+  cands.sort((a,b) => (Math.abs(a.r-center)+Math.abs(a.c-center)) - (Math.abs(b.r-center)+Math.abs(b.c-center)));
+  return cands[0];
+}
+
+const DIFF_CFG = {
+  easy:   {topK:6,  attack:0.7, defend:1.1, lookahead:false, useDoubleThreatGuard:false},
+  normal: {topK:8,  attack:1.0, defend:1.0, lookahead:false, useDoubleThreatGuard:true},
+  hard:   {topK:10, attack:1.15,defend:1.05,lookahead:true,  useDoubleThreatGuard:true},
+  vhard:  {topK:12, attack:1.25,defend:1.1, lookahead:true,  useDoubleThreatGuard:true},
+  master: {topK:14, attack:1.4, defend:1.15,lookahead:true,  useDoubleThreatGuard:true}
+};
+
+function chooseAiMove(){
+  const opp = humanSym;
+  const me = aiSym;
+  const dc = DIFF_CFG[cfg.diff] || DIFF_CFG.easy;
+  const cands = getCandidates();
+  if(!cands.length) return null;
+
+  // Evaluate every candidate for both sides once.
+  const evals = cands.map(({r,c}) => ({
+    r, c,
+    ai: evalCell(r,c,me),
+    hu: evalCell(r,c,opp)
+  }));
+
+  // 1) Immediate win for AI.
+  let m = evals.find(e => e.ai.score >= 1000000);
+  if(m) return {r:m.r, c:m.c};
+
+  // 2) Block opponent's immediate win.
+  m = evals.find(e => e.hu.score >= 1000000);
+  if(m) return {r:m.r, c:m.c};
+
+  // 3) AI can create an unstoppable open four -> take it (attack first).
+  m = evals.find(e => e.ai.score >= 60000);
+  if(m) return {r:m.r, c:m.c};
+
+  // 4) Opponent could create an open four -> must block now.
+  m = evals.find(e => e.hu.score >= 60000);
+  if(m) return {r:m.r, c:m.c};
+
+  if(dc.useDoubleThreatGuard){
+    // 5) AI can form a double-threat (e.g. double open three) -> near-certain win, prioritise attack.
+    m = evals.filter(e => e.ai.threats >= 2).sort((a,b)=>b.ai.score-a.ai.score)[0];
+    if(m) return {r:m.r, c:m.c};
+
+    // 6) Opponent could form a double-threat (double three / three+four) -> occupy that point now,
+    //    before it ever appears on the board. This is the case the old engine missed.
+    m = evals.filter(e => e.hu.threats >= 2).sort((a,b)=>b.hu.score-a.hu.score)[0];
+    if(m) return {r:m.r, c:m.c};
+
+    // 7) Opponent has a single four-level threat -> block.
+    m = evals.filter(e => e.hu.score >= 9000).sort((a,b)=>b.hu.score-a.hu.score)[0];
+    if(m) return {r:m.r, c:m.c};
+
+    // 8) AI can build its own four-level threat -> keep attacking.
+    m = evals.filter(e => e.ai.score >= 9000).sort((a,b)=>b.ai.score-a.ai.score)[0];
+    if(m) return {r:m.r, c:m.c};
+  }
+
+  // 9) General heuristic: blend attack/defence, attack weighted higher so the AI
+  //    keeps initiative instead of only reacting to the opponent.
+  evals.forEach(e => { e.total = e.ai.score*dc.attack + e.hu.score*dc.defend; });
+  evals.sort((a,b) => b.total - a.total);
+  let top = evals.slice(0, dc.topK);
+
+  if(dc.lookahead && top.length>1){
+    // 2-ply look-ahead: for each of our best candidates, simulate playing it,
+    // then find the opponent's strongest reply; pick the candidate that leaves
+    // the opponent worst off while keeping our own score high.
+    let best = null, bestVal = -Infinity;
+    for(const cand of top){
+      board[cand.r][cand.c] = me;
+      const oppCands = getCandidates();
+      let oppBest = 0;
+      for(const oc of oppCands){
+        const s = evalCell(oc.r, oc.c, opp);
+        let v = s.score;
+        if(s.threats>=2) v += 8000;
+        if(v > oppBest) oppBest = v;
+      }
+      board[cand.r][cand.c] = null;
+      const val = cand.total - oppBest*0.9;
+      if(val > bestVal){ bestVal = val; best = cand; }
+    }
+    if(best) return {r:best.r, c:best.c};
+  }
+
+  return {r:top[0].r, c:top[0].c};
+}
+
+function aiTurn(){
+  if(gameOver) return;
+  const mv = chooseAiMove() || pickFallbackMove(aiSym);
+  aiThinking = false;
+  if(mv) applyMove(mv.r, mv.c);
+}
+
+/* ============ INPUT: CLICK / TAP ============ */
+function screenToCell(x,y){
+  const c = Math.floor((x+camX)/CELL);
+  const r = Math.floor((y+camY)/CELL);
+  return {r,c};
+}
+function canPlayerAct(){
+  if(gameOver || aiThinking || paused) return false;
+  if(cfg.vs==='ai' && current!==humanSym) return false;
+  if(cfg.vs==='online' && (!onlineConnected || current!==humanSym)) return false;
+  return true;
+}
+/* Multi-pointer state: 1 finger/mouse = drag or tap-to-place, 2 fingers = pinch zoom */
+const activePointers = new Map(); // pointerId -> {x,y} in backing-store px
+let isPinching = false;
+let pinchStartDist = 0, pinchStartVisible = 11, pinchAnchor = {x:0, y:0};
+
+function toBoardPx(e){
+  const rect = canvas.getBoundingClientRect();
+  return {x:(e.clientX-rect.left)*(canvas.width/rect.width), y:(e.clientY-rect.top)*(canvas.height/rect.height)};
+}
+function pointerDist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+function pointerMid(a,b){ return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
+
+canvas.addEventListener('pointerdown', e => {
+  canvas.setPointerCapture(e.pointerId);
+  activePointers.set(e.pointerId, toBoardPx(e));
+  if(activePointers.size === 1){
+    dragging = true; dragMoved = false;
+    const rect = canvas.getBoundingClientRect();
+    dragStart = {x:e.clientX, y:e.clientY, camX, camY, sx:(e.clientX-rect.left)*(canvas.width/rect.width), sy:(e.clientY-rect.top)*(canvas.height/rect.height)};
+    canvas.classList.add('dragging');
+  } else if(activePointers.size === 2){
+    dragging = false; dragMoved = true; // cancel any single-finger tap/drag in progress
+    isPinching = true;
+    const [a,b] = [...activePointers.values()];
+    pinchStartDist = pointerDist(a,b) || 1;
+    pinchStartVisible = visibleCells;
+    pinchAnchor = pointerMid(a,b);
+  }
+});
+canvas.addEventListener('pointermove', e => {
+  if(!activePointers.has(e.pointerId)) return;
+  activePointers.set(e.pointerId, toBoardPx(e));
+  if(isPinching && activePointers.size >= 2){
+    const [a,b] = [...activePointers.values()];
+    const newDist = pointerDist(a,b) || 1;
+    const target = pinchStartVisible * (pinchStartDist / newDist);
+    zoomToward(pinchAnchor.x, pinchAnchor.y, target);
+    return;
+  }
+  if(!dragging || !dragStart) return;
+  const dx = e.clientX-dragStart.x, dy = e.clientY-dragStart.y;
+  if(Math.abs(dx)>4 || Math.abs(dy)>4) dragMoved = true;
+  if(dragMoved){
+    camX = dragStart.camX - dx;
+    camY = dragStart.camY - dy;
+    clampCamera();
+    draw();
+  }
+});
+function endPointer(e){
+  activePointers.delete(e.pointerId);
+  if(isPinching){
+    if(activePointers.size < 2){
+      isPinching = false;
+      snapVisibleCells();
+    }
+    dragging = false;
+    canvas.classList.remove('dragging');
+    dragStart = null;
+    return;
+  }
+  dragging = false;
+  canvas.classList.remove('dragging');
+  if(!dragMoved && canPlayerAct()){
+    const {x:sx, y:sy} = toBoardPx(e);
+    const {r,c} = screenToCell(sx,sy);
+    if(inBounds(r,c) && !board[r][c]) applyMove(r,c);
+  }
+  dragStart = null;
+}
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', e => {
+  activePointers.delete(e.pointerId);
+  isPinching = false; dragging = false; dragStart = null;
+});
+
+/* Mouse wheel zoom, anchored at the pointer so the board point under the
+   cursor stays put (classic map-zoom feel). One notch = one view-cell step. */
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const {x:mx, y:my} = toBoardPx(e);
+  const dir = e.deltaY > 0 ? 1 : -1;
+  zoomToward(mx, my, Math.round(visibleCells) + dir);
+}, {passive:false});
+
+/* ============ INPUT: KEYBOARD ============ */
+document.addEventListener('keydown', e => {
+  if(overlay && !overlay.classList.contains('hidden')) return;
+  if(e.key==='F11'){ e.preventDefault(); togglePause(); return; }
+  if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter',' '].includes(e.key)) return;
+  e.preventDefault();
+  switch(e.key){
+    case 'ArrowUp': cursor.r = Math.max(0, cursor.r-1); break;
+    case 'ArrowDown': cursor.r = Math.min(SIZE-1, cursor.r+1); break;
+    case 'ArrowLeft': cursor.c = Math.max(0, cursor.c-1); break;
+    case 'ArrowRight': cursor.c = Math.min(SIZE-1, cursor.c+1); break;
+    case 'Enter': case ' ':
+      if(canPlayerAct() && !board[cursor.r][cursor.c]) applyMove(cursor.r, cursor.c);
+      break;
+  }
+  draw();
+});
+
+/* ============ ZOOM / RECENTER / UNDO ============ */
+zoomInBtn.addEventListener('click', () => setVisibleCells(visibleCells-1));
+zoomOutBtn.addEventListener('click', () => setVisibleCells(visibleCells+1));
+recenterBtn.addEventListener('click', () => { centerCamera(cursor.r, cursor.c); draw(); });
+viewSizeSlider.addEventListener('input', () => setVisibleCells(parseInt(viewSizeSlider.value,10)));
+
+undoBtn.addEventListener('click', () => {
+  if(gameOver || aiThinking || paused || !history.length) return;
+  const last = history.pop();
+  if(last){
+    board[last.r][last.c] = null;
+    current = last.player;
+    cursor = {r:last.r, c:last.c};
+  }
+  gameOver = false; winLine = null;
+  updateHud();
+  resetTimer();
+  draw();
+  // If undoing left it as the AI's turn (its move was the one just removed
+  // by an earlier undo, or this undo removed the human's move), let the AI
+  // carry on automatically instead of leaving the game stuck waiting on a
+  // turn nobody can act on.
+  if(cfg.vs==='ai' && current===aiSym && !gameOver){
+    aiThinking = true;
+    updateHud();
+    aiTimeoutId = setTimeout(() => { aiTimeoutId = null; aiTurn(); }, 350 + Math.random()*300);
+  }
+});
+
+let resizePending = false;
+function scheduleResize(){
+  if(resizePending) return;
+  resizePending = true;
+  requestAnimationFrame(() => {
+    resizePending = false;
+    resizeCanvas();
+    centerCamera(cursor.r, cursor.c);
+    draw();
+  });
+}
+window.addEventListener('resize', scheduleResize);
+window.addEventListener('orientationchange', () => setTimeout(scheduleResize, 200));
+
+/* init: restore any saved settings/scores, size the canvas, render preview */
+loadScores();
+loadSettings();
+resizeCanvas();
+updateZoomLabel();
+updateHud();
+draw();
+// restoring saved settings toggles several option blocks' visibility
+// (difficulty/first-move/online panels), which can shift the overlay's
+// scrollable content and leave mobile browsers scrolled mid-list instead
+// of at the top - force it back to the top once everything has settled.
+// Some mobile browsers (scroll anchoring, font-swap reflow, or their own
+// scroll-position memory on reload/bfcache restore) can leave this panel's
+// internal scroll partway down instead of at the top. Force it back to 0
+// at several points after load, not just once, to reliably override that.
+function resetOverlayScroll(){ overlay.scrollTop = 0; }
+resetOverlayScroll();
+requestAnimationFrame(resetOverlayScroll);
+requestAnimationFrame(() => requestAnimationFrame(resetOverlayScroll));
+setTimeout(resetOverlayScroll, 60);
+setTimeout(resetOverlayScroll, 300);
+setTimeout(resetOverlayScroll, 800);
+window.addEventListener('load', resetOverlayScroll);
+window.addEventListener('pageshow', resetOverlayScroll);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(resetOverlayScroll);
+})();
+
+</script></body></html>
