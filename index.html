@@ -591,7 +591,7 @@ function handleOnlineMessage(msg){
   } else if(msg.type === 'pause'){
     if(!gameOver && !paused) pauseGame(true);
   } else if(msg.type === 'resume'){
-    if(!gameOver && paused && pausedByPeer) resumeGame(true);
+    if(!gameOver && paused) resumeGame(true);
   } else if(msg.type === 'rematch_ready'){
     rematchPeerReady = true;
     if(reviewing) updateRematchUI();
@@ -1461,9 +1461,9 @@ function updateHud(){
   scoreboard.innerHTML = `<span>X <b>${scores.X||0}</b></span><span>O <b>${scores.O||0}</b></span>`;
   undoBtn.disabled = history.length===0 || aiThinking || gameOver || paused || cfg.vs==='online';
   if(undoBtn.disabled && document.activeElement===undoBtn) undoBtn.blur();
-  pauseBtn.disabled = gameOver || pausedByPeer;
+  pauseBtn.disabled = gameOver;
   pauseBtn.innerHTML = paused ? '<span class="icn-play"></span>' : '<span class="icn-pause"><i></i><i></i></span>';
-  pauseBtn.title = pausedByPeer ? 'Đối thủ đang tạm dừng' : (paused ? 'Tiếp tục (F11)' : 'Tạm dừng (F11)');
+  pauseBtn.title = paused ? 'Tiếp tục (F11)' : 'Tạm dừng (F11)';
 }
 function updateZoomLabel(){
   const disp = Math.round(visibleCells); // visibleCells can be fractional mid-pinch; display rounded
@@ -1536,10 +1536,11 @@ function resetTimer(){
 
    In online mode, pause/resume is synced to the peer via {type:'pause'} /
    {type:'resume'} messages so neither side is left staring at a ticking
-   clock while the other has silently stepped away. `pausedByPeer` marks a
-   pause that arrived from the network rather than being started locally —
-   only the side that started a pause can end it, so the other side just
-   sees a "waiting" notice with a way to leave, not a Tiếp Tục button. */
+/* `pausedByPeer` marks a pause that arrived from the network rather than
+   being started locally, purely so the overlay text can say "đối thủ đã
+   tạm dừng" instead of "bạn đã tạm dừng" — either side can still resume a
+   pause regardless of who started it, so nobody gets stuck waiting on a
+   peer who stepped away. */
 let pausedByPeer = false;
 function pauseGame(silent){
   if(gameOver || paused) return;
@@ -1558,7 +1559,6 @@ function pauseGame(silent){
 }
 function resumeGame(silent){
   if(!paused) return;
-  if(pausedByPeer && !silent) return; // can't end a pause the other side started
   paused = false;
   pausedByPeer = false;
   pauseOverlay.classList.add('hidden');
@@ -1580,18 +1580,16 @@ function updatePauseOverlayContent(){
   const subEl = pauseOverlay.querySelector('.sub');
   if(pausedByPeer){
     titleEl.textContent = 'ĐỐI THỦ TẠM DỪNG';
-    subEl.textContent = 'Đối thủ đang tạm dừng ván đấu — vui lòng chờ, hoặc bấm "Trở Về Menu" để thoát.';
-    resumeBtn.style.display = 'none';
+    subEl.textContent = 'Đối thủ đã tạm dừng ván đấu — bạn có thể bấm Tiếp Tục để chơi tiếp, hoặc \"Trở Về Menu\" để thoát.';
   } else {
     titleEl.textContent = 'TẠM DỪNG';
     subEl.textContent = 'Ván đấu đang tạm dừng — thời gian và bàn cờ được giữ nguyên.';
-    resumeBtn.style.display = '';
   }
+  resumeBtn.style.display = '';
 }
 function togglePause(){
   if(overlay && !overlay.classList.contains('hidden')) return;
   if(gameOver) return;
-  if(pausedByPeer) return; // waiting on the other side, nothing local F11/button can do but leave
   if(paused) resumeGame(); else pauseGame();
 }
 pauseBtn.addEventListener('click', togglePause);
