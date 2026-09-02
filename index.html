@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CARO</title><style>:root{--bg-deep:#060910;--bg-panel:#0c111d;--grid-line:#1c2740;--text-dim:#6b7a99;--text-bright:#eaf6ff;--card-bg:#0e1524;--card-border:#1c2740;--x-color:#4dfff3;--o-color:#ff4dd8;--win-color:#ffd24d}*{box-sizing:border-box}body,html{margin:0;padding:0;height:100%;min-height:100vh;background:radial-gradient(circle at 20% 15%,rgba(77,255,243,.05),transparent 40%),radial-gradient(circle at 80% 85%,rgba(255,77,216,.05),transparent 40%),var(--bg-deep);display:flex;align-items:center;justify-content:center;font-family:'Segoe UI','Courier New',monospace;overflow:hidden;color:var(--text-bright)}.stage{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px}.title{font-weight:900;letter-spacing:10px;font-size:24px;margin:0;display:flex;align-items:center;gap:10px;color:var(--text-bright);text-shadow:0 0 8px var(--x-color),0 0 24px rgba(77,255,243,.4)}.title span{color:var(--o-color);text-shadow:0 0 8px var(--o-color),0 0 22px rgba(255,77,216,.45)}.hud{display:flex;justify-content:space-between;align-items:center;width:var(--board-size,480px);max-width:92vw;color:var(--text-dim);font-size:12px;letter-spacing:1.5px;text-transform:uppercase;gap:6px;flex-wrap:wrap}.turn-tag{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:1.2px;padding:5px 11px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,.02)}.turn-dot{width:10px;height:10px;border-radius:50%;transition:.2s}.timer-tag{font-size:12px;letter-spacing:1px;padding:5px 11px;border-radius:20px;border:1px solid var(--card-border);background:rgba(255,255,255,.02);color:var(--text-bright);min-width:52px;text-align:center;transition:.2s}.move-count{font-size:10.5px;color:var(--text-dim)}.btn-row{display:flex;gap:6px}.icon-btn{background:0 0;border:1px solid var(--card-border);color:var(--text-dim);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;-webkit-tap-highlight-color:transparent}.icon-btn:hover{color:var(--x-color);border-color:var(--x-color)}.icon-btn:disabled{opacity:.35;cursor:not-allowed;outline:none}.hud2{display:flex;align-items:center;gap:8px;width:var(--board-size,480px);max-width:92vw;justify-content:center}.zoom-label{font-size:10px;letter-spacing:1.5px;color:var(--text-dim);min-width:78px;text-align:center;text-transform:uppercase}.hud3{display:flex;align-items:center;gap:9px;width:var(--board-size,480px);max-width:92vw;justify-content:center}.view-slider-label{font-size:9.5px;letter-spacing:1.2px;color:var(--text-dim);text-transform:uppercase;white-space:nowrap}.view-slider-val{font-size:10px;letter-spacing:1px;color:var(--text-bright);min-width:44px;text-align:center;white-space:nowrap}#viewSizeSlider{flex:1;max-width:220px;-webkit-appearance:none;appearance:none;height:4px;border-radius:3px;background:var(--card-border);outline:0;cursor:pointer}#viewSizeSlider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--win-color);box-shadow:0 0 8px rgba(255,210,77,.6);cursor:pointer;border:0}#viewSizeSlider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--win-color);box-shadow:0 0 8px rgba(255,210,77,.6);cursor:pointer;border:0}#viewSizeSlider::-moz-range-track{height:4px;border-radius:3px;background:var(--card-border)}.board-wrap{position:relative;border:1px solid #22314d;border-radius:10px;box-shadow:0 0 0 1px rgba(77,255,243,.06),0 0 40px rgba(77,255,243,.1),inset 0 0 70px rgba(0,0,0,.4);background:rgba(12,17,29,.32);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:hidden;touch-action:none}canvas{display:block;border-radius:10px;cursor:grab;touch-action:none}canvas.dragging{cursor:grabbing}.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;background:rgba(6,9,16,.3);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:10px;text-align:center;padding:18px;overflow-y:auto;overflow-anchor:none}
-#overlay{justify-content:flex-start}.overlay.hidden{display:none}.overlay h2{margin:0;font-size:19px;letter-spacing:4px;color:var(--o-color);text-shadow:0 0 10px rgba(255,77,216,.65)}.overlay h2.pop{animation:.5s cubic-bezier(.2,1.6,.4,1) popIn}@keyframes popIn{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}.overlay .sub{margin:-4px 0 2px;color:var(--text-dim);font-size:10.5px;letter-spacing:1px;max-width:360px;line-height:1.6}.opt-block{width:100%;max-width:360px;text-align:left}.opt-label{font-size:9.5px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px}.pill-row{display:flex;gap:6px;flex-wrap:wrap}.pill{flex:1;min-width:64px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-dim);padding:6px 5px;border-radius:7px;font-size:10px;letter-spacing:1px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit}.pill:hover{border-color:rgba(255,210,77,.5)}.pill.selected{border-color:var(--win-color);color:var(--win-color);background:rgba(255,210,77,.08)}.swatch{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}.swatch.rainbow{background:conic-gradient(from 0deg,#ff3b3b,#ff9f4d,#ffe14d,#4dff88,#4dc7ff,#8a4dff,#ff4dd8,#ff3b3b)!important}.turn-dot.rainbow{background:conic-gradient(from 0deg,#ff3b3b,#ff9f4d,#ffe14d,#4dff88,#4dc7ff,#8a4dff,#ff4dd8,#ff3b3b)!important;animation:2.4s linear infinite rainbowSpin}@keyframes rainbowSpin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}button.primary{font-family:inherit;font-weight:700;letter-spacing:3px;background:0 0;color:var(--x-color);border:1px solid var(--x-color);padding:10px 26px;border-radius:6px;cursor:pointer;text-transform:uppercase;font-size:12.5px;transition:.15s;box-shadow:0 0 10px rgba(77,255,243,.15)}button.primary:hover{background:rgba(77,255,243,.12);box-shadow:0 0 18px rgba(77,255,243,.4)}button.primary.ghost{color:var(--o-color);border-color:var(--o-color);box-shadow:0 0 10px rgba(255,77,216,.15)}button.primary.ghost:hover{background:rgba(255,77,216,.12);box-shadow:0 0 18px rgba(255,77,216,.4)}button:focus-visible{outline:2px solid var(--win-color);outline-offset:2px}.scoreboard{display:flex;gap:14px;font-size:11px;color:var(--text-dim);letter-spacing:.5px}.scoreboard b{font-size:14px}.hint{color:var(--text-dim);font-size:10px;letter-spacing:.8px;text-align:center;max-width:460px;line-height:1.6}
+#overlay{justify-content:flex-start}.overlay.hidden{display:none}.overlay h2{margin:0;font-size:19px;letter-spacing:4px;color:var(--o-color);text-shadow:0 0 10px rgba(255,77,216,.65)}.overlay h2.pop{animation:.5s cubic-bezier(.2,1.6,.4,1) popIn}@keyframes popIn{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}.overlay .sub{margin:-4px 0 2px;color:var(--text-dim);font-size:10.5px;letter-spacing:1px;max-width:360px;line-height:1.6}.opt-block{width:100%;max-width:360px;text-align:left}.opt-label{font-size:9.5px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px}.pill-row{display:flex;gap:6px;flex-wrap:wrap}.pill{flex:1;min-width:64px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-dim);padding:6px 5px;border-radius:7px;font-size:10px;letter-spacing:1px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit}.pill:hover{border-color:rgba(255,210,77,.5)}.pill.selected{border-color:var(--win-color);color:var(--win-color);background:rgba(255,210,77,.08)}.swatch{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}.swatch.rainbow{background:conic-gradient(from 0deg,#ff3b3b,#ff9f4d,#ffe14d,#4dff88,#4dc7ff,#8a4dff,#ff4dd8,#ff3b3b)!important}.turn-dot.rainbow{background:conic-gradient(from 0deg,#ff3b3b,#ff9f4d,#ffe14d,#4dff88,#4dc7ff,#8a4dff,#ff4dd8,#ff3b3b)!important;animation:2.4s linear infinite rainbowSpin}@keyframes rainbowSpin{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}button.primary{font-family:inherit;font-weight:700;letter-spacing:3px;background:0 0;color:var(--x-color);border:1px solid var(--x-color);padding:10px 26px;border-radius:6px;cursor:pointer;text-transform:uppercase;font-size:12.5px;transition:.15s;box-shadow:0 0 10px rgba(77,255,243,.15)}button.primary:hover{background:rgba(77,255,243,.12);box-shadow:0 0 18px rgba(77,255,243,.4)}button.primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}button.primary.ghost{color:var(--o-color);border-color:var(--o-color);box-shadow:0 0 10px rgba(255,77,216,.15)}button.primary.ghost:hover{background:rgba(255,77,216,.12);box-shadow:0 0 18px rgba(255,77,216,.4)}button:focus-visible{outline:2px solid var(--win-color);outline-offset:2px}.scoreboard{display:flex;gap:14px;font-size:11px;color:var(--text-dim);letter-spacing:.5px}.scoreboard b{font-size:14px}.hint{color:var(--text-dim);font-size:10px;letter-spacing:.8px;text-align:center;max-width:460px;line-height:1.6}
 .code-box{width:100%;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-bright);font-family:monospace;font-size:9.5px;padding:7px;border-radius:7px;resize:none;box-sizing:border-box;line-height:1.4;margin-top:2px}
 .code-box:focus{outline:none;border-color:var(--x-color)}
 .mini-btn{background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-dim);padding:5px 12px;border-radius:6px;font-size:9.5px;letter-spacing:1px;cursor:pointer;margin-top:5px;font-family:inherit;-webkit-tap-highlight-color:transparent}
@@ -31,7 +31,9 @@ html.bg-oceanflow,body.bg-oceanflow{background:linear-gradient(-45deg,#00c6ff,#0
 #resultPanel.dragging .rp-handle{cursor:grabbing}</style>
 <style>*{-webkit-user-select:none;user-select:none}</style>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-</head><body><div class="stage"><h1 class="title">CARO <span>5</span></h1><div class="hud" id="hudBar" style="display:none"><div class="turn-tag"><span class="turn-dot" id="turnDot"></span><span id="turnLabel">Lượt: X</span></div><div class="timer-tag" id="timerTag">⏱ 30s</div><div class="move-count" id="moveCount">Nước đi: 0</div><div class="btn-row"><button class="icon-btn" id="undoBtn" title="Hoàn tác">↩</button> <button class="icon-btn" id="pauseBtn" title="Tạm dừng (F11)"><span class="icn-pause"><i></i><i></i></span></button> <button class="icon-btn" id="settingsBtn" title="Cài đặt">⚙</button></div></div><div class="hud2" id="hudBar2" style="display:none"><button class="icon-btn" id="zoomOutBtn" title="Thu nhỏ">−</button> <span class="zoom-label" id="zoomLabel">Vùng: 11×11</span> <button class="icon-btn" id="zoomInBtn" title="Phóng to">+</button> <button class="icon-btn" id="recenterBtn" title="Về vị trí con trỏ">⌖</button></div><div class="hud3" id="hudBar3" style="display:none"><span class="view-slider-label">Ô hiển thị</span><input type="range" id="viewSizeSlider" min="5" max="26" step="1" value="11"><span class="view-slider-val" id="viewSizeVal">11×11</span></div><div class="board-wrap"><canvas id="board" width="480" height="480"></canvas><div class="overlay" id="overlay"><h2>CARO 5</h2><p class="sub">Xếp đủ 5 quân liên tiếp theo hàng ngang, dọc hoặc chéo để thắng. Bàn lớn có thể kéo để xem, thời gian mỗi lượt tùy bạn chọn!</p><div class="opt-block"><div class="opt-label">THỂ THỨC</div><div class="pill-row" id="vsRow"><button class="pill selected" data-value="pvp">2 NGƯỜI</button> <button class="pill" data-value="ai">ĐẤU VỚI MÁY</button> <button class="pill" data-value="online">ONLINE (LAN)</button></div></div><div class="opt-block" id="diffBlock" style="display:none"><div class="opt-label">ĐỘ KHÓ MÁY</div><div class="pill-row" id="diffRow"><button class="pill selected" data-value="easy">DỄ</button> <button class="pill" data-value="normal">VỪA</button> <button class="pill" data-value="hard">KHÓ</button> <button class="pill" data-value="vhard">CỰC KHÓ</button> <button class="pill" data-value="master">BẤT KHẢ CHIẾN BẠI</button></div></div><div class="opt-block" id="firstBlock" style="display:none"><div class="opt-label">LƯỢT ĐI TRƯỚC</div><div class="pill-row" id="firstRow"><button class="pill selected" data-value="human">BẠN ĐI TRƯỚC</button> <button class="pill" data-value="ai">MÁY ĐI TRƯỚC</button></div></div><div class="opt-block" id="onlineBlock" style="display:none">
+</head><body><div class="stage"><h1 class="title">CARO <span>5</span></h1><div class="hud" id="hudBar" style="display:none"><div class="turn-tag"><span class="turn-dot" id="turnDot"></span><span id="turnLabel">Lượt: X</span></div><div class="timer-tag" id="timerTag">⏱ 30s</div><div class="move-count" id="moveCount">Nước đi: 0</div><div class="btn-row"><button class="icon-btn" id="undoBtn" title="Hoàn tác">↩</button> <button class="icon-btn" id="pauseBtn" title="Tạm dừng (F11)"><span class="icn-pause"><i></i><i></i></span></button> <button class="icon-btn" id="settingsBtn" title="Cài đặt">⚙</button></div></div><div class="hud2" id="hudBar2" style="display:none"><button class="icon-btn" id="zoomOutBtn" title="Thu nhỏ">−</button> <span class="zoom-label" id="zoomLabel">Vùng: 11×11</span> <button class="icon-btn" id="zoomInBtn" title="Phóng to">+</button> <button class="icon-btn" id="recenterBtn" title="Về vị trí con trỏ">⌖</button></div><div class="hud3" id="hudBar3" style="display:none"><span class="view-slider-label">Ô hiển thị</span><input type="range" id="viewSizeSlider" min="5" max="26" step="1" value="11"><span class="view-slider-val" id="viewSizeVal">11×11</span></div><div class="hud3" id="onlineNamesBar" style="display:none;justify-content:center;gap:10px;font-size:10.5px;letter-spacing:.5px;color:var(--text-dim);text-align:center"></div><div class="board-wrap"><canvas id="board" width="480" height="480"></canvas><div class="overlay" id="overlay"><h2>CARO 5</h2><p class="sub">Xếp đủ 5 quân liên tiếp theo hàng ngang, dọc hoặc chéo để thắng. Bàn lớn có thể kéo để xem, thời gian mỗi lượt tùy bạn chọn!</p><div class="opt-block"><div class="opt-label">THỂ THỨC</div><div class="pill-row" id="vsRow"><button class="pill selected" data-value="pvp">2 NGƯỜI</button> <button class="pill" data-value="ai">ĐẤU VỚI MÁY</button> <button class="pill" data-value="online">ONLINE (LAN)</button></div></div><div class="opt-block" id="diffBlock" style="display:none"><div class="opt-label">ĐỘ KHÓ MÁY</div><div class="pill-row" id="diffRow"><button class="pill selected" data-value="easy">DỄ</button> <button class="pill" data-value="normal">VỪA</button> <button class="pill" data-value="hard">KHÓ</button> <button class="pill" data-value="vhard">CỰC KHÓ</button> <button class="pill" data-value="master">BẤT KHẢ CHIẾN BẠI</button></div></div><div class="opt-block" id="firstBlock" style="display:none"><div class="opt-label">LƯỢT ĐI TRƯỚC</div><div class="pill-row" id="firstRow"><button class="pill selected" data-value="human">BẠN ĐI TRƯỚC</button> <button class="pill" data-value="ai">MÁY ĐI TRƯỚC</button></div></div><div class="opt-block" id="onlineBlock" style="display:none">
+<div class="opt-label">TÊN HIỂN THỊ CỦA BẠN</div>
+<input type="text" id="playerNameInput" class="code-box" maxlength="20" placeholder="Nhập tên để đối thủ dễ nhận ra..." style="text-align:center;font-size:13px;padding:8px;letter-spacing:.5px;margin-bottom:8px">
 <div class="opt-label">PHƯƠNG THỨC KẾT NỐI</div>
 <div class="pill-row" id="connMethodRow"><button class="pill selected" data-value="code">MÃ PHÒNG (INTERNET)</button> <button class="pill" data-value="lan">LAN SERVER (NODE.JS)</button> <button class="pill" data-value="manual">P2P THỦ CÔNG</button></div>
 
@@ -43,7 +45,10 @@ html.bg-oceanflow,body.bg-oceanflow{background:linear-gradient(-45deg,#00c6ff,#0
   <div id="hostStep2" style="display:none;text-align:center">
     <div class="opt-label" style="margin-top:10px">MÃ PHÒNG CỦA BẠN — ĐỌC CHO BẠN CỦA BẠN</div>
     <div id="roomCodeDisplay" class="room-code"></div>
-    <button class="mini-btn" id="copyRoomCodeBtn">Sao Chép Mã</button>
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+      <button class="mini-btn" id="copyRoomCodeBtn">Sao Chép Mã</button>
+      <button class="mini-btn" id="copyRoomLinkBtn">Sao Chép Liên Kết Mời</button>
+    </div>
   </div>
 </div>
 <div id="guestPanel" style="display:none;margin-top:8px">
@@ -148,6 +153,8 @@ const diffBlock = document.getElementById('diffBlock');
 const firstRow = document.getElementById('firstRow');
 const firstBlock = document.getElementById('firstBlock');
 const onlineBlock = document.getElementById('onlineBlock');
+const playerNameInput = document.getElementById('playerNameInput');
+const onlineNamesBar = document.getElementById('onlineNamesBar');
 const connMethodRow = document.getElementById('connMethodRow');
 const codeMethodPanel = document.getElementById('codeMethodPanel');
 const lanMethodPanel = document.getElementById('lanMethodPanel');
@@ -160,6 +167,7 @@ const createRoomBtn = document.getElementById('createRoomBtn');
 const hostStep2 = document.getElementById('hostStep2');
 const roomCodeDisplay = document.getElementById('roomCodeDisplay');
 const copyRoomCodeBtn = document.getElementById('copyRoomCodeBtn');
+const copyRoomLinkBtn = document.getElementById('copyRoomLinkBtn');
 const guestCodeInput = document.getElementById('guestCodeInput');
 const joinRoomBtn = document.getElementById('joinRoomBtn');
 const randomPanel = document.getElementById('randomPanel');
@@ -247,6 +255,25 @@ let onlineConnected = false;
 let qmToken = 0;          // quick-match session token — bumped on cancel/reset so stale async steps no-op
 let qmStartTimeout = null; // quick-match guest safety-net timer (see scanQuickMatchSlots)
 let localSymbol = null; // this client's symbol when cfg.vs==='online'
+let selfInitiatedLeave = false; // true while our own 'bye' is being flushed, so our own close event doesn't self-trigger handlePeerLeft
+let myName = (localStorage.getItem('caro5_name') || '').trim().slice(0,20);
+let opponentName = '';
+let hostSymbolForRound = 'X'; // which symbol the host plays as this round — flips each online rematch for fairness
+let rematchLocalReady = false;
+let rematchPeerReady = false;
+playerNameInput.value = myName;
+playerNameInput.addEventListener('input', () => {
+  myName = playerNameInput.value.trim().slice(0,20);
+  localStorage.setItem('caro5_name', myName);
+});
+function updateOnlineNamesBar(){
+  if(cfg.vs !== 'online' || !localSymbol){ onlineNamesBar.style.display = 'none'; return; }
+  const oppSymbol = localSymbol === 'X' ? 'O' : 'X';
+  const myLabel = myName || 'Bạn';
+  const oppLabel = opponentName || 'Đối thủ';
+  onlineNamesBar.textContent = `${localSymbol} · ${myLabel}   ⚔   ${oppSymbol} · ${oppLabel}`;
+  onlineNamesBar.style.display = 'flex';
+}
 
 const W = () => canvas.width;
 const H = () => canvas.height;
@@ -493,6 +520,7 @@ function setHudVisible(show){
   hudBar.style.display = d;
   hudBar2.style.display = d;
   hudBar3.style.display = d;
+  if(!show) onlineNamesBar.style.display = 'none';
 }
 
 /* ============ ONLINE — shared transport layer ============
@@ -530,15 +558,19 @@ function copyText(str){
 function onTransportOpen(){
   onlineConnected = true;
   if(onlineRole === 'host'){
+    hostSymbolForRound = 'X';
     localSymbol = 'X';
-    onlineSend({type:'start', size: cfg.size, time: cfg.time});
+    onlineSend({type:'start', size: cfg.size, time: cfg.time, name: myName});
     startOnlineGame();
   } else {
     setConnStatus('Đã kết nối! Đang chờ chủ phòng bắt đầu...', 'ok');
   }
 }
 function onTransportClose(){
-  if(cfg.vs==='online' && !gameOver && localSymbol) handlePeerLeft();
+  // Skip this when we're the ones who just chose to leave (returnToMenu already
+  // sent 'bye' and is tearing the connection down itself) — otherwise this same
+  // close event would make us report ourselves as "the peer who left".
+  if(cfg.vs==='online' && localSymbol && !selfInitiatedLeave) handlePeerLeft();
   onlineConnected = false;
 }
 function handleOnlineMessage(msg){
@@ -547,7 +579,12 @@ function handleOnlineMessage(msg){
     cfg.size = msg.size;
     cfg.time = msg.time;
     localSymbol = 'O';
+    opponentName = (msg.name || '').trim().slice(0,20);
+    onlineSend({type:'hello', name: myName});
     startOnlineGame();
+  } else if(msg.type === 'hello'){
+    opponentName = (msg.name || '').trim().slice(0,20);
+    updateOnlineNamesBar();
   } else if(msg.type === 'move'){
     if(gameOver) return;
     applyMove(msg.r, msg.c, true);
@@ -555,6 +592,18 @@ function handleOnlineMessage(msg){
     if(!gameOver && !paused) pauseGame(true);
   } else if(msg.type === 'resume'){
     if(!gameOver && paused && pausedByPeer) resumeGame(true);
+  } else if(msg.type === 'rematch_ready'){
+    rematchPeerReady = true;
+    if(reviewing) updateRematchUI();
+    if(rematchLocalReady) confirmRematch();
+  } else if(msg.type === 'rematch_start'){
+    rematchLocalReady = false;
+    rematchPeerReady = false;
+    cfg.size = msg.size;
+    cfg.time = msg.time;
+    hostSymbolForRound = msg.hostSymbol;
+    localSymbol = msg.hostSymbol === 'X' ? 'O' : 'X';
+    startOnlineGame();
   } else if(msg.type === 'bye'){
     handlePeerLeft();
   }
@@ -563,10 +612,20 @@ function handleOnlineMessage(msg){
    immediately in the local player's favor - a live match with no opponent
    left to play has nothing else it can fairly resolve to, and this way the
    remaining player is never stuck waiting indefinitely for someone who
-   isn't coming back. */
+   isn't coming back.
+
+   This also fires after the match has already ended (gameOver===true) —
+   e.g. the peer disconnects while both sides are still deciding on a
+   rematch — in which case there's no winner left to (re-)declare, just the
+   waiting-for-rematch UI to update so the remaining player isn't left
+   staring at a "waiting for opponent" state that can never resolve. */
 function handlePeerLeft(){
-  if(gameOver) return;
   onlineConnected = false;
+  if(gameOver){
+    cancelRematchWait();
+    if(resultPanelEl && resultPanelEl.style.display !== 'none') updateResultPanelForPeerLeft();
+    return;
+  }
   gameOver = true;
   paused = false;
   pausedByPeer = false;
@@ -583,13 +642,16 @@ function handlePeerLeft(){
   updateHud();
   reviewIndex = history.length;
   reviewing = true;
+  const winLabel = winner ? `${winner} (${myName || 'Bạn'})` : null;
   showResultPanel(winner, {
-    title: winner ? (winner + ' THẮNG — ĐỐI THỦ ĐÃ THOÁT') : 'ĐỐI THỦ ĐÃ THOÁT',
+    title: winLabel ? `${winLabel} THẮNG — ĐỐI THỦ ĐÃ THOÁT` : 'ĐỐI THỦ ĐÃ THOÁT',
     sub: 'Đối thủ đã rời phòng hoặc mất kết nối giữa ván. Bấm ⚙ để trở về menu.'
   });
 }
 function startOnlineGame(){
   hideResultPanel();
+  rematchLocalReady = false;
+  rematchPeerReady = false;
   SIZE = parseInt(cfg.size, 10);
   resizeCanvas();
   board = Array.from({length:SIZE}, () => Array(SIZE).fill(null));
@@ -610,6 +672,7 @@ function startOnlineGame(){
   resetTimer();
   overlay.classList.add('hidden');
   setHudVisible(true);
+  updateOnlineNamesBar();
   draw();
 }
 function resetOnlineConnection(){
@@ -619,6 +682,11 @@ function resetOnlineConnection(){
   onlineConnected = false;
   onlineRole = null;
   localSymbol = null;
+  opponentName = '';
+  selfInitiatedLeave = false;
+  rematchLocalReady = false;
+  rematchPeerReady = false;
+  hostSymbolForRound = 'X';
   // method 1: mã phòng (PeerJS)
   hostStep2.style.display = 'none';
   createRoomBtn.style.display = '';
@@ -758,6 +826,8 @@ function joinRoom(){
    queue, just without a dedicated matchmaking server. */
 const QM_PREFIX = ROOM_PREFIX + 'qm';
 const QM_SLOTS = 25;
+const QM_BATCH = 6;          // slots probed in parallel per round — was fully sequential (1 at a time)
+const QM_SLOT_TIMEOUT = 1800; // fallback if a single probe never gets open/error at all (was 3500)
 function quickMatchOrder(){
   const arr = Array.from({length: QM_SLOTS}, (_, i) => i);
   for(let i = arr.length - 1; i > 0; i--){
@@ -776,6 +846,13 @@ function startQuickMatch(){
   const myToken = ++qmToken;
   scanQuickMatchSlots(myToken, quickMatchOrder(), 0);
 }
+/* Probes up to QM_BATCH rendezvous slots at once instead of one at a time —
+   each slot still needs its own Peer() (a PeerJS id is 1:1 with a broker
+   registration), but firing a batch together means an empty run of slots
+   costs one round-trip instead of N sequential ones, cutting typical
+   matchmaking time roughly by the batch size. First slot in the batch to
+   find someone already waiting wins the match; every other attempt still
+   in flight (this batch or a stale one) is torn down immediately. */
 function scanQuickMatchSlots(token, order, idx){
   if(token !== qmToken) return; // cancelled or reset while this step was pending
   if(idx >= order.length){
@@ -783,57 +860,79 @@ function scanQuickMatchSlots(token, order, idx){
     hostQuickMatchSlot(token, order[Math.floor(Math.random() * order.length)], 0);
     return;
   }
-  let peer;
-  try{ peer = new Peer(); }catch(err){ setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err'); return; }
-  peerObj = peer;
-  let settled = false;
-  const giveUp = setTimeout(() => {
-    if(settled || token !== qmToken || peerObj !== peer) return;
-    settled = true;
-    try{ peer.destroy(); }catch(e){}
-    scanQuickMatchSlots(token, order, idx + 1);
-  }, 3500);
-  peer.on('open', () => {
-    if(token !== qmToken || peerObj !== peer) return;
-    const conn = peer.connect(QM_PREFIX + order[idx], {reliable: true});
-    conn.on('open', () => {
-      if(settled || token !== qmToken || peerObj !== peer) return;
+  const batch = order.slice(idx, idx + QM_BATCH);
+  const attempts = [];
+  let won = false;
+  let settledCount = 0;
+  function attemptSettled(){
+    settledCount++;
+    if(!won && settledCount === batch.length){
+      scanQuickMatchSlots(token, order, idx + QM_BATCH);
+    }
+  }
+  batch.forEach(slot => {
+    if(token !== qmToken || won){ attemptSettled(); return; }
+    let peer;
+    try{ peer = new Peer(); }catch(err){
+      setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err');
+      attemptSettled();
+      return;
+    }
+    attempts.push(peer);
+    let settled = false;
+    const giveUp = setTimeout(() => {
+      if(settled) return;
+      settled = true;
+      try{ peer.destroy(); }catch(e){}
+      attemptSettled();
+    }, QM_SLOT_TIMEOUT);
+    peer.on('open', () => {
+      if(settled || token !== qmToken || won) return;
+      const conn = peer.connect(QM_PREFIX + slot, {reliable: true});
+      conn.on('open', () => {
+        if(settled || token !== qmToken || won || transport){ try{ conn.close(); }catch(e){} return; }
+        settled = true;
+        won = true;
+        clearTimeout(giveUp);
+        peerObj = peer;
+        onlineRole = 'guest';
+        transport = {
+          send(o){ if(conn.open) conn.send(JSON.stringify(o)); },
+          isOpen(){ return conn.open; },
+          close(){ try{ conn.close(); }catch(e){} }
+        };
+        conn.on('close', onTransportClose);
+        conn.on('error', onTransportClose);
+        conn.on('data', data => { let m; try{ m = JSON.parse(data); }catch(e){ return; } handleOnlineMessage(m); });
+        // We've got a match — cancel every other probe still in flight from
+        // this batch so they don't keep polling or claim a second match.
+        attempts.forEach(p => { if(p !== peer){ try{ p.destroy(); }catch(e){} } });
+        onTransportOpen();
+        // Ultra-rare safety net: two searchers can land on the same slot back
+        // to back, so the host we reached may already be occupied and will
+        // silently ignore us (never sending 'start'). If that happens, stop
+        // waiting and keep searching instead of sitting frozen forever.
+        qmStartTimeout = setTimeout(() => {
+          if(token !== qmToken || localSymbol) return;
+          onlineTeardown();
+          setConnStatus('Phòng vừa bận, đang tìm đối thủ khác...', '');
+          scanQuickMatchSlots(token, quickMatchOrder(), 0);
+        }, 6000);
+      });
+    });
+    peer.on('error', err => {
+      if(settled) return;
       settled = true;
       clearTimeout(giveUp);
-      onlineRole = 'guest';
-      transport = {
-        send(o){ if(conn.open) conn.send(JSON.stringify(o)); },
-        isOpen(){ return conn.open; },
-        close(){ try{ conn.close(); }catch(e){} }
-      };
-      conn.on('close', onTransportClose);
-      conn.on('error', onTransportClose);
-      conn.on('data', data => { let m; try{ m = JSON.parse(data); }catch(e){ return; } handleOnlineMessage(m); });
-      onTransportOpen();
-      // Ultra-rare safety net: two searchers can land on the same slot back
-      // to back, so the host we reached may already be occupied and will
-      // silently ignore us (never sending 'start'). If that happens, stop
-      // waiting and keep searching instead of sitting frozen forever.
-      qmStartTimeout = setTimeout(() => {
-        if(token !== qmToken || localSymbol) return;
-        onlineTeardown();
-        setConnStatus('Phòng vừa bận, đang tìm đối thủ khác...', '');
-        scanQuickMatchSlots(token, quickMatchOrder(), 0);
-      }, 6000);
+      try{ peer.destroy(); }catch(e){}
+      if(err.type !== 'peer-unavailable' && !won){
+        setConnStatus('Lỗi kết nối (' + err.type + '). Kiểm tra mạng và thử lại.', 'err');
+        randomMatchBtn.style.display = '';
+        randomStep2.style.display = 'none';
+        qmToken++; // stop the rest of this batch/search from continuing
+      }
+      attemptSettled();
     });
-  });
-  peer.on('error', err => {
-    if(settled || token !== qmToken || peerObj !== peer) return;
-    settled = true;
-    clearTimeout(giveUp);
-    try{ peer.destroy(); }catch(e){}
-    if(err.type === 'peer-unavailable'){
-      scanQuickMatchSlots(token, order, idx + 1); // slot empty, try the next one
-    } else {
-      setConnStatus('Lỗi kết nối (' + err.type + '). Kiểm tra mạng và thử lại.', 'err');
-      randomMatchBtn.style.display = '';
-      randomStep2.style.display = 'none';
-    }
   });
 }
 function hostQuickMatchSlot(token, slot, tries){
@@ -1098,6 +1197,11 @@ manualRoleRow.addEventListener('click', e => {
 createRoomBtn.addEventListener('click', createRoom);
 joinRoomBtn.addEventListener('click', joinRoom);
 copyRoomCodeBtn.addEventListener('click', () => copyText(roomCodeDisplay.textContent));
+copyRoomLinkBtn.addEventListener('click', () => {
+  const code = roomCodeDisplay.textContent.trim();
+  if(!code) return;
+  copyText(location.origin + location.pathname + '?room=' + code);
+});
 guestCodeInput.addEventListener('input', () => { guestCodeInput.value = guestCodeInput.value.replace(/\D/g,'').slice(0,6); });
 guestCodeInput.addEventListener('keydown', e => { if(e.key==='Enter') joinRoom(); });
 
@@ -1505,10 +1609,19 @@ function returnToMenu(){
   aiThinking = false;
   clearInterval(timerInterval);
   if(aiTimeoutId){ clearTimeout(aiTimeoutId); aiTimeoutId = null; }
-  if(cfg.vs==='online' && onlineIsOpen()){
+  const wasOnline = cfg.vs === 'online' && onlineIsOpen();
+  if(wasOnline){
+    selfInitiatedLeave = true;
     try{ onlineSend({type:'bye'}); }catch(e){}
+    // Give the 'bye' message a moment to actually flush over the data
+    // channel before tearing the connection down — closing right after
+    // send() can race the browser's outgoing buffer and drop the message,
+    // leaving the other side stuck waiting until a slow ICE-timeout
+    // disconnect instead of finding out immediately that we left.
+    setTimeout(() => { resetOnlineConnection(); }, 150);
+  } else {
+    resetOnlineConnection();
   }
-  resetOnlineConnection();
   hideResultPanel();
   pauseOverlay.classList.add('hidden');
   setHudVisible(false);
@@ -1574,7 +1687,13 @@ function endGame(winner, line){
   updateHud();
   reviewIndex = history.length;
   reviewing = true;
-  showResultPanel(winner);
+  if(cfg.vs === 'online' && winner){
+    const isMe = winner === localSymbol;
+    const label = isMe ? (myName || 'Bạn') : (opponentName || 'Đối thủ');
+    showResultPanel(winner, { title: `${winner} (${label}) THẮNG!` });
+  } else {
+    showResultPanel(winner);
+  }
 }
 
 /* ============ RESULT PANEL (shown after a game ends, board stays visible) ============ */
@@ -1598,7 +1717,8 @@ function buildResultPanel(){
     <div style="display:flex;gap:6px;">
       <button id="rpReplay" class="primary" style="flex:1;padding:7px 4px;font-size:10.5px;letter-spacing:1.5px;">CHƠI LẠI</button>
       <button id="rpEnd" class="icon-btn" style="flex:1;width:auto;font-size:10.5px;letter-spacing:1px;">KẾT THÚC</button>
-    </div>`;
+    </div>
+    <div id="rpOnlineStatus" style="display:none;font-size:9.5px;color:var(--text-dim);text-align:center;margin-top:7px;line-height:1.4"></div>`;
   // Attached to <body> (not board-wrap) with position:fixed, so it is free to
   // be dragged outside the board's edges instead of being clipped by
   // board-wrap's overflow:hidden.
@@ -1608,7 +1728,7 @@ function buildResultPanel(){
   el.querySelector('#rpNext').addEventListener('click', () => { stopReplay(); reviewIndex = Math.min(history.length, reviewIndex+1); updateReviewUI(); });
   el.querySelector('#rpPlay').addEventListener('click', toggleReplayPlay);
   el.querySelector('#rpSpeed').addEventListener('click', cycleReplaySpeed);
-  el.querySelector('#rpReplay').addEventListener('click', () => { hideResultPanel(); startGame(); });
+  el.querySelector('#rpReplay').addEventListener('click', handleReplayClick);
   el.querySelector('#rpEnd').addEventListener('click', () => { hideResultPanel(); returnToMenu(); });
   makeResultPanelDraggable(el, el.querySelector('.rp-handle'));
   return el;
@@ -1715,6 +1835,8 @@ function updateReviewUI(){
 }
 function showResultPanel(winner, opts){
   opts = opts || {};
+  rematchLocalReady = false;
+  rematchPeerReady = false;
   const el = buildResultPanel();
   // always reappear anchored to the board's top-right corner, even if the
   // player dragged it elsewhere (possibly off the board) during a previous
@@ -1730,11 +1852,85 @@ function showResultPanel(winner, opts){
     : 'Bàn cờ đã đầy, không ai thắng. Kéo thanh phía trên để di chuyển bảng này, dùng ◀ ▶ để xem lại từng nước.');
   el.style.display = 'block';
   updateReviewUI();
+  if(cfg.vs === 'online') updateRematchUI();
 }
 function hideResultPanel(){
   reviewing = false;
   stopReplay();
   if(resultPanelEl) resultPanelEl.style.display = 'none';
+}
+
+/* ============ ONLINE REMATCH ============
+   "CHƠI LẠI" (Play Again) after an online match doesn't restart on its own —
+   it asks the peer, over the *existing* connection, and only actually
+   starts once both sides have agreed. This avoids one player being dropped
+   into an empty local board while the other still thinks they're online
+   (the old behaviour, which just called startGame() and silently tore the
+   connection down). The host is authoritative for the resulting round
+   (settings + who plays X, alternated each time for fairness) so the two
+   sides can never race into two different game states. */
+function handleReplayClick(){
+  if(cfg.vs !== 'online'){
+    hideResultPanel();
+    startGame();
+    return;
+  }
+  if(!onlineConnected){
+    // peer is already gone — nothing to rematch with, so this button just
+    // takes the player back to the setup screen to find a new match.
+    hideResultPanel();
+    returnToMenu();
+    return;
+  }
+  if(rematchLocalReady) return; // already requested, just waiting on the peer
+  rematchLocalReady = true;
+  onlineSend({type:'rematch_ready'});
+  updateRematchUI();
+  if(rematchPeerReady) confirmRematch();
+}
+function confirmRematch(){
+  if(onlineRole !== 'host') return; // guest just waits for the host's authoritative 'rematch_start'
+  hostSymbolForRound = hostSymbolForRound === 'X' ? 'O' : 'X'; // alternate who starts each rematch
+  localSymbol = hostSymbolForRound;
+  rematchLocalReady = false;
+  rematchPeerReady = false;
+  onlineSend({type:'rematch_start', size: cfg.size, time: cfg.time, hostSymbol: hostSymbolForRound});
+  startOnlineGame();
+}
+function cancelRematchWait(){
+  rematchLocalReady = false;
+  rematchPeerReady = false;
+}
+function updateRematchUI(){
+  if(!resultPanelEl) return;
+  const btn = resultPanelEl.querySelector('#rpReplay');
+  const statusEl = resultPanelEl.querySelector('#rpOnlineStatus');
+  if(cfg.vs !== 'online'){ statusEl.style.display = 'none'; btn.disabled = false; btn.textContent = 'CHƠI LẠI'; return; }
+  if(!onlineConnected){
+    btn.textContent = 'TÌM TRẬN MỚI';
+    btn.disabled = false;
+    statusEl.style.display = 'none';
+    return;
+  }
+  btn.textContent = 'CHƠI LẠI';
+  if(rematchLocalReady && !rematchPeerReady){
+    btn.disabled = true;
+    statusEl.style.display = '';
+    statusEl.textContent = 'Đang chờ đối thủ đồng ý chơi lại...';
+  } else if(!rematchLocalReady && rematchPeerReady){
+    btn.disabled = false;
+    statusEl.style.display = '';
+    statusEl.textContent = 'Đối thủ muốn chơi lại — bấm CHƠI LẠI để đồng ý!';
+  } else {
+    btn.disabled = false;
+    statusEl.style.display = 'none';
+  }
+}
+function updateResultPanelForPeerLeft(){
+  const el = buildResultPanel();
+  el.querySelector('#rpTitle').textContent = 'ĐỐI THỦ ĐÃ THOÁT';
+  el.querySelector('#rpSub').textContent = 'Đối thủ đã rời phòng trong lúc chờ ván mới. Bấm ⚙ để trở về menu.';
+  updateRematchUI();
 }
 
 /* ============ WIN CHECK ============ */
@@ -2088,9 +2284,29 @@ function scheduleResize(){
 window.addEventListener('resize', scheduleResize);
 window.addEventListener('orientationchange', () => setTimeout(scheduleResize, 200));
 
+/* ---- auto-join from an invite link (?room=NNNNNN) ----
+   Lets "Sao Chép Liên Kết Mời" produce a link that drops the recipient
+   straight into the guest-join flow instead of them having to read a
+   6-digit code out loud and type it in by hand. */
+function autoJoinFromLink(){
+  let roomParam;
+  try{ roomParam = new URLSearchParams(location.search).get('room'); }catch(e){ return; }
+  if(!roomParam || !/^\d{6}$/.test(roomParam)) return;
+  history.replaceState(null, '', location.pathname + location.hash); // avoid re-joining if the page is refreshed
+  selectPill(vsRow, 'vs', 'online', {silent:true});
+  const codePill = connMethodRow.querySelector('[data-value="code"]');
+  if(codePill) codePill.click();
+  const guestPill = onlineRoleRow.querySelector('[data-value="guest"]');
+  if(guestPill) guestPill.click();
+  guestCodeInput.value = roomParam;
+  setConnStatus('Đang tự động vào phòng từ liên kết mời...', '');
+  setTimeout(() => joinRoomBtn.click(), 250);
+}
+
 /* init: restore any saved settings/scores, size the canvas, render preview */
 loadScores();
 loadSettings();
+autoJoinFromLink(); // runs after loadSettings so a shared invite link always wins over any previously saved mode
 resizeCanvas();
 updateZoomLabel();
 updateHud();
