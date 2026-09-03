@@ -256,7 +256,21 @@ let qmToken = 0;          // quick-match session token — bumped on cancel/rese
 let qmStartTimeout = null; // quick-match guest safety-net timer (see scanQuickMatchSlots)
 let localSymbol = null; // this client's symbol when cfg.vs==='online'
 let selfInitiatedLeave = false; // true while our own 'bye' is being flushed, so our own close event doesn't self-trigger handlePeerLeft
-let myName = (localStorage.getItem('caro5_name') || '').trim().slice(0,20);
+/* Safe localStorage wrapper: some embedding contexts (WebView2 without a
+   user-data folder configured, sandboxed/about:blank frames, file:// with
+   storage disabled, etc.) throw a SecurityError on the mere act of reading
+   window.localStorage — not just on setItem — so every access needs to be
+   inside a try/catch, not just the ones that were already wrapped. Falls
+   back to an in-memory object so the name field / settings / scoreboard
+   still work for the current session even when nothing can persist. */
+const memoryStorageFallback = {};
+function lsGet(key){
+  try{ return localStorage.getItem(key); }catch(e){ return Object.prototype.hasOwnProperty.call(memoryStorageFallback, key) ? memoryStorageFallback[key] : null; }
+}
+function lsSet(key, val){
+  try{ localStorage.setItem(key, val); }catch(e){ memoryStorageFallback[key] = val; }
+}
+let myName = (lsGet('caro5_name') || '').trim().slice(0,20);
 let opponentName = '';
 let hostSymbolForRound = 'X'; // which symbol the host plays as this round — flips each online rematch for fairness
 let rematchLocalReady = false;
@@ -264,7 +278,7 @@ let rematchPeerReady = false;
 playerNameInput.value = myName;
 playerNameInput.addEventListener('input', () => {
   myName = playerNameInput.value.trim().slice(0,20);
-  localStorage.setItem('caro5_name', myName);
+  lsSet('caro5_name', myName);
 });
 function updateOnlineNamesBar(){
   if(cfg.vs !== 'online' || !localSymbol){ onlineNamesBar.style.display = 'none'; return; }
@@ -364,7 +378,7 @@ const LS_SCORES_KEY = 'caroV10.scores';
 let saveSettingsTimer = null;
 function saveSettings(){
   try{
-    localStorage.setItem(LS_SETTINGS_KEY, JSON.stringify({cfg, bgCustom: bgCustomPicker.value, visibleCells: Math.round(visibleCells)}));
+    lsSet(LS_SETTINGS_KEY, JSON.stringify({cfg, bgCustom: bgCustomPicker.value, visibleCells: Math.round(visibleCells)}));
   }catch(e){ /* private mode / quota / unavailable - ignore, gameplay still works */ }
 }
 function scheduleSaveSettings(){
@@ -373,7 +387,7 @@ function scheduleSaveSettings(){
 }
 function loadSettings(){
   try{
-    const raw = localStorage.getItem(LS_SETTINGS_KEY);
+    const raw = lsGet(LS_SETTINGS_KEY);
     if(!raw) return;
     const data = JSON.parse(raw);
     if(data.bgCustom){
@@ -391,11 +405,11 @@ function loadSettings(){
   }catch(e){ /* corrupt/unavailable storage - fall back to defaults */ }
 }
 function saveScores(){
-  try{ localStorage.setItem(LS_SCORES_KEY, JSON.stringify(scores)); }catch(e){}
+  try{ lsSet(LS_SCORES_KEY, JSON.stringify(scores)); }catch(e){}
 }
 function loadScores(){
   try{
-    const raw = localStorage.getItem(LS_SCORES_KEY);
+    const raw = lsGet(LS_SCORES_KEY);
     if(!raw) return;
     const s = JSON.parse(raw);
     if(s && typeof s==='object') scores = {X: s.X||0, O: s.O||0};
@@ -2069,8 +2083,9 @@ function buildWindow(r,c,dr,dc,player){
   return s;
 }
 /* Evaluate placing `player` at (r,c). Returns {score, threats} where threats
-   is how many directions independently reach open-three level (>=1800) —
-   used to catch double-three / double-four combos. */
+   is how many directions independently reach three-in-a-row level (>=1300,
+   includes broken/"jump" threes like S.SS. which are just as fork-prone as
+   a plain open three) — used to catch double-three / double-four combos. */
 function evalCell(r,c,player){
   if(board[r][c] !== null) return {score:-1, threats:0};
   let total = 0, threats = 0;
@@ -2078,7 +2093,7 @@ function evalCell(r,c,player){
     const s = buildWindow(r,c,dr,dc,player);
     const sc = patternScore(s);
     total += sc;
-    if(sc >= 1800) threats++;
+    if(sc >= 1300) threats++;
   }
   if(threats >= 2) total += 8000; // double-threat bonus (e.g. double open three)
   return {score:total, threats};
@@ -2110,12 +2125,72 @@ function pickFallbackMove(player){
 }
 
 const DIFF_CFG = {
-  easy:   {topK:6,  attack:0.7, defend:1.1, lookahead:false, useDoubleThreatGuard:false},
-  normal: {topK:8,  attack:1.0, defend:1.0, lookahead:false, useDoubleThreatGuard:true},
-  hard:   {topK:10, attack:1.15,defend:1.05,lookahead:true,  useDoubleThreatGuard:true},
-  vhard:  {topK:12, attack:1.25,defend:1.1, lookahead:true,  useDoubleThreatGuard:true},
-  master: {topK:14, attack:1.4, defend:1.15,lookahead:true,  useDoubleThreatGuard:true}
+  easy:   {topK:6,  attack:0.7, defend:1.1, lookahead:false, useDoubleThreatGuard:false, safetyBudget:0, defendMultiplier:1.3, defendTrigger:320},
+  normal: {topK:8,  attack:1.0, defend:1.05,lookahead:false, useDoubleThreatGuard:true,  safetyBudget:1, defendMultiplier:1.5, defendTrigger:320},
+  hard:   {topK:12, attack:1.15,defend:1.2, lookahead:true,  useDoubleThreatGuard:true,  safetyBudget:2, defendMultiplier:1.8, defendTrigger:220},
+  vhard:  {topK:16, attack:1.25,defend:1.3, lookahead:true,  useDoubleThreatGuard:true,  safetyBudget:2, defendMultiplier:2.0, defendTrigger:140},
+  master: {topK:20, attack:1.3, defend:1.55,lookahead:true,  useDoubleThreatGuard:true,  safetyBudget:3, defendMultiplier:2.6, defendTrigger:45}
 };
+
+/* Empty cells within `radius` of (r,c) only — cheap, local alternative to
+   getCandidates() (which rescans the WHOLE board) for use inside the
+   recursive safety search below, where it would otherwise be called
+   hundreds of times per AI turn. Tactically relevant replies to a move are
+   always right next to that move, so this loses nothing that matters here. */
+function neighborCells(r, c, radius){
+  const out = [];
+  for(let dr=-radius; dr<=radius; dr++){
+    for(let dc=-radius; dc<=radius; dc++){
+      const rr=r+dr, cc=c+dc;
+      if(!inBounds(rr,cc) || board[rr][cc]) continue;
+      out.push({r:rr, c:cc});
+    }
+  }
+  return out;
+}
+
+/* Recursively checks: if `me` plays (r,c) right now, can `opp` force a win
+   or an unstoppable fork within `budget` extra move-pairs? budget=0 only
+   checks opp's immediate replies (old 1-ply safety net). budget>0 also
+   follows opp's forcing four-threats (score>=9000, single open end — the
+   kind that MUST be answered) one level deeper: does `me` actually have a
+   reply that keeps things safe, or does defending here just walk into the
+   next trap? This is what catches the multi-move "quiet diagonal" combo
+   traps a purely reactive (block-what's-already-dangerous) AI misses. */
+function isSafeMove(r, c, me, opp, budget){
+  board[r][c] = me;
+  const oppCells = neighborCells(r, c, 2);
+  // How many replies we actually check scales with the remaining budget —
+  // a shallow (easy/normal) check only needs to rule out the most obvious
+  // counters, but the deeper master-tier search widens the net so a sneaky
+  // reply ranked 5th or 6th by raw score doesn't slip through unchecked.
+  const oppEvals = oppCells
+    .map(cc => ({r:cc.r, c:cc.c, e: evalCell(cc.r, cc.c, opp)}))
+    .sort((a,b) => b.e.score - a.e.score)
+    .slice(0, Math.min(oppCells.length, budget > 0 ? 6 + budget*2 : 4));
+  let safe = true;
+  for(const oe of oppEvals){
+    if(oe.e.score >= 1000000 || oe.e.threats >= 2){ safe = false; break; }
+    if(budget > 0 && oe.e.score >= 9000){
+      // Opponent has a forcing four here — see if we still have a safe way
+      // to respond once they play it, instead of just assuming we can.
+      board[oe.r][oe.c] = opp;
+      const meCells = neighborCells(oe.r, oe.c, 2);
+      const meEvals = meCells
+        .map(mc => ({r:mc.r, c:mc.c, e: evalCell(mc.r, mc.c, me)}))
+        .sort((a,b) => b.e.score - a.e.score)
+        .slice(0, Math.min(meCells.length, 4 + budget));
+      let meHasSafe = meEvals.length === 0;
+      for(const m2 of meEvals){
+        if(isSafeMove(m2.r, m2.c, me, opp, budget - 1)){ meHasSafe = true; break; }
+      }
+      board[oe.r][oe.c] = null;
+      if(!meHasSafe){ safe = false; break; }
+    }
+  }
+  board[r][c] = null;
+  return safe;
+}
 
 function chooseAiMove(){
   const opp = humanSym;
@@ -2147,18 +2222,23 @@ function chooseAiMove(){
   m = evals.find(e => e.hu.score >= 60000);
   if(m) return {r:m.r, c:m.c};
 
+  // 5) Opponent could form a double-threat (fork, e.g. double open three) ->
+  //    occupy that point right now, before it ever lands on the board. This
+  //    and step 6 below run at EVERY difficulty, not just the harder tiers:
+  //    letting a forced-loss sequence through isn't "easy mode", it's the
+  //    AI simply not seeing it coming — which is exactly the loss in the
+  //    screenshot. "Easy" stays weaker by attacking less cleverly, not by
+  //    being blind to a fork.
+  m = evals.filter(e => e.hu.threats >= 2).sort((a,b)=>b.hu.score-a.hu.score)[0];
+  if(m) return {r:m.r, c:m.c};
+
+  // 6) Opponent has a single four-level threat (still one open end) -> block.
+  m = evals.filter(e => e.hu.score >= 9000).sort((a,b)=>b.hu.score-a.hu.score)[0];
+  if(m) return {r:m.r, c:m.c};
+
   if(dc.useDoubleThreatGuard){
-    // 5) AI can form a double-threat (e.g. double open three) -> near-certain win, prioritise attack.
+    // 7) AI can form its own double-threat -> near-certain win, keep attacking.
     m = evals.filter(e => e.ai.threats >= 2).sort((a,b)=>b.ai.score-a.ai.score)[0];
-    if(m) return {r:m.r, c:m.c};
-
-    // 6) Opponent could form a double-threat (double three / three+four) -> occupy that point now,
-    //    before it ever appears on the board. This is the case the old engine missed.
-    m = evals.filter(e => e.hu.threats >= 2).sort((a,b)=>b.hu.score-a.hu.score)[0];
-    if(m) return {r:m.r, c:m.c};
-
-    // 7) Opponent has a single four-level threat -> block.
-    m = evals.filter(e => e.hu.score >= 9000).sort((a,b)=>b.hu.score-a.hu.score)[0];
     if(m) return {r:m.r, c:m.c};
 
     // 8) AI can build its own four-level threat -> keep attacking.
@@ -2166,9 +2246,22 @@ function chooseAiMove(){
     if(m) return {r:m.r, c:m.c};
   }
 
-  // 9) General heuristic: blend attack/defence, attack weighted higher so the AI
-  //    keeps initiative instead of only reacting to the opponent.
-  evals.forEach(e => { e.total = e.ai.score*dc.attack + e.hu.score*dc.defend; });
+  // 9) General heuristic: blend attack/defence. If the AI has no real attack
+  //    of its own on the board right now (nothing reaching open-three level
+  //    anywhere) but the opponent has some shape developing, lean hard into
+  //    defence instead of trading blows — "can't attack -> play to not lose".
+  //    Both how much weaker the AI's own attack has to be (bestAiScore<2400,
+  //    unchanged) AND how little the opponent needs to be building before
+  //    that's treated as worth defending against (dc.defendTrigger) AND how
+  //    hard the AI leans into defence once triggered (dc.defendMultiplier)
+  //    now scale with difficulty — "master" gets nervous about even a bare
+  //    pair (defendTrigger:45) and defends far more aggressively (x2.6)
+  //    whenever it has nothing better to do, which is what keeps it from
+  //    ever quietly letting a slow multi-move combo develop unopposed.
+  const bestAiScore = Math.max(...evals.map(e => e.ai.score));
+  const bestHuScore = Math.max(...evals.map(e => e.hu.score));
+  const defendBoost = (bestAiScore < 2400 && bestHuScore >= dc.defendTrigger) ? dc.defendMultiplier : 1;
+  evals.forEach(e => { e.total = e.ai.score*dc.attack + e.hu.score*dc.defend*defendBoost; });
   evals.sort((a,b) => b.total - a.total);
   let top = evals.slice(0, dc.topK);
 
@@ -2191,10 +2284,26 @@ function chooseAiMove(){
       const val = cand.total - oppBest*0.9;
       if(val > bestVal){ bestVal = val; best = cand; }
     }
-    if(best) return {r:best.r, c:best.c};
+    // Keep the look-ahead winner first, but preserve the rest of `top` as
+    // fallback options for the safety net below instead of discarding them.
+    if(best) top = [best, ...top.filter(t => t!==best)];
   }
 
-  return {r:top[0].r, c:top[0].c};
+  // 10) Safety net: never willingly hand the opponent a forced win — or, on
+  //     the harder tiers, a forced win a couple of moves down the line. Walk
+  //     the ranked candidates (best first) and check each one with
+  //     isSafeMove — which, per dc.safetyBudget, also verifies we still have
+  //     a safe reply after the opponent's next forcing four, not just that
+  //     their immediate next move doesn't win outright. Play the first
+  //     candidate that's actually safe. This is what stops the AI from
+  //     wandering into a multi-move combo trap (like the quiet diagonal in
+  //     the loss screenshot) while it's busy reacting to a louder threat
+  //     elsewhere on the board.
+  const budget = dc.safetyBudget || 0;
+  for(const cand of top){
+    if(isSafeMove(cand.r, cand.c, me, opp, budget)) return {r:cand.r, c:cand.c};
+  }
+  return {r:top[0].r, c:top[0].c}; // every option was risky — fall back to the best-ranked one
 }
 
 function aiTurn(){
