@@ -402,11 +402,13 @@ function loadScores(){
   }catch(e){ /* ignore */ }
 }
 
+let rainbowActive = false; // true while the "Cầu Vồng" palette is selected — see draw()
 function applyTheme(name){
   const t = THEMES[name] || THEMES.neon;
   document.documentElement.style.setProperty('--x-color', t.x);
   document.documentElement.style.setProperty('--o-color', t.o);
   turnDot.classList.toggle('rainbow', !!t.rainbow);
+  rainbowActive = !!t.rainbow;
 }
 applyTheme('neon');
 
@@ -1452,6 +1454,17 @@ function draw(){
   const xColor = getCss('--x-color'), oColor = getCss('--o-color');
   const rad = CELL*0.32;
   const disp = getDisplayState();
+  // Cầu Vồng ("rainbow") palette: instead of the usual flat X/O color, each
+  // mark's color is driven by the ORDER it was played in, spread around the
+  // hue wheel by the golden angle so consecutive stones are always clearly
+  // distinct colors — the board visibly fills up like a rainbow as the game
+  // goes on, instead of just swapping X/O to two plain fixed colors.
+  let moveOrder = null;
+  if(rainbowActive){
+    moveOrder = new Map();
+    const lim = (reviewing && reviewIndex < history.length) ? reviewIndex : history.length;
+    for(let i=0;i<lim;i++){ const m = history[i]; moveOrder.set(m.r+','+m.c, i); }
+  }
   for(let r=startRow;r<endRow;r++){
     const rowArr = disp.b[r];
     if(!rowArr) continue;
@@ -1462,14 +1475,22 @@ function draw(){
       const cy = r*CELL - camY + CELL/2;
       const onWin = disp.win && disp.win.some(([wr,wc]) => wr===r && wc===c);
       const isLast = disp.lastCell && disp.lastCell.r===r && disp.lastCell.c===c;
+      let markColor;
+      if(rainbowActive){
+        const idx = moveOrder.has(r+','+c) ? moveOrder.get(r+','+c) : 0;
+        markColor = 'hsl(' + ((idx*137.5)%360) + ' 90% 62%)';
+      } else {
+        markColor = v==='X' ? xColor : oColor;
+      }
       ctx.save();
       if(onWin){ ctx.shadowColor = getCss('--win-color'); ctx.shadowBlur = Math.max(6, CELL*0.25); }
+      else if(rainbowActive){ ctx.shadowColor = markColor; ctx.shadowBlur = Math.max(4, CELL*0.16); }
       if(v==='X'){
-        ctx.strokeStyle = xColor; ctx.lineWidth = Math.max(2, CELL*0.1); ctx.lineCap='round';
+        ctx.strokeStyle = markColor; ctx.lineWidth = Math.max(2, CELL*0.1); ctx.lineCap='round';
         ctx.beginPath(); ctx.moveTo(cx-rad,cy-rad); ctx.lineTo(cx+rad,cy+rad);
         ctx.moveTo(cx+rad,cy-rad); ctx.lineTo(cx-rad,cy+rad); ctx.stroke();
       } else {
-        ctx.strokeStyle = oColor; ctx.lineWidth = Math.max(2, CELL*0.1);
+        ctx.strokeStyle = markColor; ctx.lineWidth = Math.max(2, CELL*0.1);
         ctx.beginPath(); ctx.arc(cx,cy,rad,0,Math.PI*2); ctx.stroke();
       }
       ctx.restore();
