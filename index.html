@@ -678,6 +678,7 @@ function startOnlineGame(){
 function resetOnlineConnection(){
   qmToken++; // invalidate any in-flight quick-match scan/host steps
   if(qmStartTimeout){ clearTimeout(qmStartTimeout); qmStartTimeout = null; }
+  if(qmHostRehuntTimer){ clearTimeout(qmHostRehuntTimer); qmHostRehuntTimer = null; }
   onlineTeardown();
   onlineConnected = false;
   onlineRole = null;
@@ -725,24 +726,58 @@ const ROOM_PREFIX = 'caro5v17-';
 function randomRoomCode(){
   return String(Math.floor(100000 + Math.random()*900000)); // 6 digits
 }
+/* Shared PeerJS bootstrap for methods 1 and 1b.
+   - Explicit ICE config (STUN + a free TURN relay) so the actual WebRTC data
+     channel still connects on mobile networks / carrier-grade NAT where a
+     STUN-only setup silently fails to punch through.
+   - PeerJS's own signaling connection to its cloud broker is transient by
+     nature (public shared server) — err.type 'network' / 'socket-error' /
+     'server-error' mean "couldn't reach the broker right now", not a real
+     failure, so those get a few silent auto-retries with backoff instead of
+     immediately surfacing an error to the user.
+   - 'disconnected' (signaling link dropped after a successful connect, e.g.
+     brief wifi/4G hiccup) triggers peer.reconnect() automatically instead of
+     killing the whole session. */
+const PEERJS_ICE = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+  ]
+};
+const PEERJS_TRANSIENT_ERRS = new Set(['network', 'socket-error', 'server-error', 'socket-closed']);
+const PEERJS_MAX_AUTO_RETRIES = 3;
+function makePeer(id){
+  const opts = { config: PEERJS_ICE, debug: 0 };
+  return id ? new Peer(id, opts) : new Peer(opts);
+}
+function attachAutoReconnect(peer){
+  peer.on('disconnected', () => {
+    if(peerObj !== peer || peer.destroyed) return;
+    setTimeout(() => { if(peerObj === peer && !peer.destroyed) peer.reconnect(); }, 600);
+  });
+}
 function createRoom(){
   onlineTeardown();
   onlineRole = 'host';
   connMethod = 'code';
   createRoomBtn.disabled = true;
   setConnStatus('Đang tạo phòng...', '');
-  attemptCreatePeer(0);
+  attemptCreatePeer(0, 0);
 }
-function attemptCreatePeer(tries){
+function attemptCreatePeer(tries, retries){
   const code = randomRoomCode();
   let peer;
   try{
-    peer = new Peer(ROOM_PREFIX + code);
+    peer = makePeer(ROOM_PREFIX + code);
   }catch(err){
     setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err');
     return;
   }
   peerObj = peer;
+  attachAutoReconnect(peer);
   peer.on('open', () => {
     if(peerObj !== peer) return; // stale attempt (user switched away)
     roomCodeDisplay.textContent = code;
@@ -766,7 +801,11 @@ function attemptCreatePeer(tries){
   peer.on('error', err => {
     if(peerObj !== peer) return;
     if(err.type === 'unavailable-id' && tries < 5){
-      attemptCreatePeer(tries+1); // code collision, very rare - just retry with a new one
+      attemptCreatePeer(tries+1, retries); // code collision, very rare - just retry with a new one
+    } else if(PEERJS_TRANSIENT_ERRS.has(err.type) && retries < PEERJS_MAX_AUTO_RETRIES){
+      try{ peer.destroy(); }catch(e){}
+      setConnStatus('Đang tạo phòng... (thử lại kết nối ' + (retries+1) + '/' + PEERJS_MAX_AUTO_RETRIES + ')', '');
+      setTimeout(() => { if(onlineRole === 'host' && !transport) attemptCreatePeer(0, retries+1); }, 800 * (retries+1));
     } else {
       createRoomBtn.disabled = false;
       setConnStatus('Không tạo được phòng (' + err.type + '). Kiểm tra kết nối mạng và thử lại.', 'err');
@@ -784,14 +823,18 @@ function joinRoom(){
   connMethod = 'code';
   joinRoomBtn.disabled = true;
   setConnStatus('Đang kết nối...', '');
+  attemptJoinPeer(code, 0);
+}
+function attemptJoinPeer(code, retries){
   let peer;
   try{
-    peer = new Peer();
+    peer = makePeer();
   }catch(err){
     setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err');
     return;
   }
   peerObj = peer;
+  attachAutoReconnect(peer);
   peer.on('open', () => {
     if(peerObj !== peer) return;
     const conn = peer.connect(ROOM_PREFIX + code, {reliable:true});
@@ -807,10 +850,15 @@ function joinRoom(){
   });
   peer.on('error', err => {
     if(peerObj !== peer) return;
-    joinRoomBtn.disabled = false;
     if(err.type === 'peer-unavailable'){
+      joinRoomBtn.disabled = false;
       setConnStatus('Không tìm thấy phòng với mã này. Kiểm tra lại mã.', 'err');
+    } else if(PEERJS_TRANSIENT_ERRS.has(err.type) && retries < PEERJS_MAX_AUTO_RETRIES){
+      try{ peer.destroy(); }catch(e){}
+      setConnStatus('Đang kết nối... (thử lại ' + (retries+1) + '/' + PEERJS_MAX_AUTO_RETRIES + ')', '');
+      setTimeout(() => { if(onlineRole === 'guest' && !transport) attemptJoinPeer(code, retries+1); }, 800 * (retries+1));
     } else {
+      joinRoomBtn.disabled = false;
       setConnStatus('Lỗi kết nối (' + err.type + '). Kiểm tra mạng và thử lại.', 'err');
     }
   });
@@ -825,9 +873,10 @@ function joinRoom(){
    first free one and waits there as host — exactly like a real matchmaking
    queue, just without a dedicated matchmaking server. */
 const QM_PREFIX = ROOM_PREFIX + 'qm';
-const QM_SLOTS = 25;
-const QM_BATCH = 6;          // slots probed in parallel per round — was fully sequential (1 at a time)
-const QM_SLOT_TIMEOUT = 1800; // fallback if a single probe never gets open/error at all (was 3500)
+const QM_SLOTS = 40;          // independent rendezvous slots = independent concurrent matches ("nhiều phòng kiểu như game thật")
+const QM_SLOT_TIMEOUT = 1500; // per-probe fallback if open/error never fires
+const QM_HOST_REHUNT_MS = 3500; // if hosting with nobody joining this long, go actively search instead of just waiting
+let qmHostRehuntTimer = null;
 function quickMatchOrder(){
   const arr = Array.from({length: QM_SLOTS}, (_, i) => i);
   for(let i = arr.length - 1; i > 0; i--){
@@ -844,38 +893,31 @@ function startQuickMatch(){
   randomStep2.style.display = '';
   setConnStatus('Đang tìm đối thủ ngẫu nhiên...', '');
   const myToken = ++qmToken;
-  scanQuickMatchSlots(myToken, quickMatchOrder(), 0);
+  scanQuickMatchSlots(myToken, quickMatchOrder());
 }
-/* Probes up to QM_BATCH rendezvous slots at once instead of one at a time —
-   each slot still needs its own Peer() (a PeerJS id is 1:1 with a broker
-   registration), but firing a batch together means an empty run of slots
-   costs one round-trip instead of N sequential ones, cutting typical
-   matchmaking time roughly by the batch size. First slot in the batch to
-   find someone already waiting wins the match; every other attempt still
-   in flight (this batch or a stale one) is torn down immediately. */
-function scanQuickMatchSlots(token, order, idx){
+/* Probes every rendezvous slot AT ONCE (one round-trip to the broker,
+   instead of the old sequential-batches approach) — whichever slot already
+   has someone waiting connects almost immediately, so two ready players
+   get matched about as fast as the network allows. Only if literally every
+   slot comes back empty do we fall back to hosting one ourselves. */
+function scanQuickMatchSlots(token, order){
   if(token !== qmToken) return; // cancelled or reset while this step was pending
-  if(idx >= order.length){
-    // Scanned every slot and nobody's waiting — become the host ourselves.
-    hostQuickMatchSlot(token, order[Math.floor(Math.random() * order.length)], 0);
-    return;
-  }
-  const batch = order.slice(idx, idx + QM_BATCH);
   const attempts = [];
   let won = false;
   let settledCount = 0;
-  function attemptSettled(){
+  function allSettled(){
     settledCount++;
-    if(!won && settledCount === batch.length){
-      scanQuickMatchSlots(token, order, idx + QM_BATCH);
+    if(!won && settledCount === order.length){
+      // Nobody was waiting on any slot — become a host so the next searcher finds us.
+      hostQuickMatchSlot(token, order[Math.floor(Math.random() * order.length)], 0);
     }
   }
-  batch.forEach(slot => {
-    if(token !== qmToken || won){ attemptSettled(); return; }
+  order.forEach(slot => {
+    if(token !== qmToken || won){ allSettled(); return; }
     let peer;
-    try{ peer = new Peer(); }catch(err){
+    try{ peer = makePeer(); }catch(err){
       setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err');
-      attemptSettled();
+      allSettled();
       return;
     }
     attempts.push(peer);
@@ -884,7 +926,7 @@ function scanQuickMatchSlots(token, order, idx){
       if(settled) return;
       settled = true;
       try{ peer.destroy(); }catch(e){}
-      attemptSettled();
+      allSettled();
     }, QM_SLOT_TIMEOUT);
     peer.on('open', () => {
       if(settled || token !== qmToken || won) return;
@@ -904,8 +946,8 @@ function scanQuickMatchSlots(token, order, idx){
         conn.on('close', onTransportClose);
         conn.on('error', onTransportClose);
         conn.on('data', data => { let m; try{ m = JSON.parse(data); }catch(e){ return; } handleOnlineMessage(m); });
-        // We've got a match — cancel every other probe still in flight from
-        // this batch so they don't keep polling or claim a second match.
+        // Got a match — cancel every other probe still in flight so they
+        // don't keep polling the broker or accidentally claim a 2nd match.
         attempts.forEach(p => { if(p !== peer){ try{ p.destroy(); }catch(e){} } });
         onTransportOpen();
         // Ultra-rare safety net: two searchers can land on the same slot back
@@ -916,8 +958,8 @@ function scanQuickMatchSlots(token, order, idx){
           if(token !== qmToken || localSymbol) return;
           onlineTeardown();
           setConnStatus('Phòng vừa bận, đang tìm đối thủ khác...', '');
-          scanQuickMatchSlots(token, quickMatchOrder(), 0);
-        }, 6000);
+          scanQuickMatchSlots(token, quickMatchOrder());
+        }, 4000);
       });
     });
     peer.on('error', err => {
@@ -925,28 +967,43 @@ function scanQuickMatchSlots(token, order, idx){
       settled = true;
       clearTimeout(giveUp);
       try{ peer.destroy(); }catch(e){}
-      if(err.type !== 'peer-unavailable' && !won){
+      if(err.type !== 'peer-unavailable' && !PEERJS_TRANSIENT_ERRS.has(err.type) && !won){
         setConnStatus('Lỗi kết nối (' + err.type + '). Kiểm tra mạng và thử lại.', 'err');
         randomMatchBtn.style.display = '';
         randomStep2.style.display = 'none';
-        qmToken++; // stop the rest of this batch/search from continuing
+        qmToken++; // stop the rest of this round from continuing
       }
-      attemptSettled();
+      allSettled();
     });
   });
 }
 function hostQuickMatchSlot(token, slot, tries){
   if(token !== qmToken) return;
+  if(qmHostRehuntTimer){ clearTimeout(qmHostRehuntTimer); qmHostRehuntTimer = null; }
   let peer;
-  try{ peer = new Peer(QM_PREFIX + slot); }catch(err){ setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err'); return; }
+  try{ peer = makePeer(QM_PREFIX + slot); }catch(err){ setConnStatus('Trình duyệt không hỗ trợ kết nối online.', 'err'); return; }
   peerObj = peer;
   peer.on('open', () => {
     if(token !== qmToken || peerObj !== peer) return;
     onlineRole = 'host';
     setConnStatus('Đang chờ đối thủ ngẫu nhiên vào phòng...', '');
+    // Two players can both scan-and-find-nothing at the same instant and
+    // both end up hosting on different empty slots — a permanent deadlock
+    // under the old logic. Instead: if nobody joins within QM_HOST_REHUNT_MS,
+    // stop waiting passively and go actively search other slots (someone
+    // else's host slot will now show up immediately). Whoever still isn't
+    // matched keeps alternating host <-> search until the two converge —
+    // in practice this resolves in well under a second past the timeout.
+    qmHostRehuntTimer = setTimeout(() => {
+      if(token !== qmToken || transport) return;
+      try{ peer.destroy(); }catch(e){}
+      setConnStatus('Đang tìm đối thủ ngẫu nhiên...', '');
+      scanQuickMatchSlots(token, quickMatchOrder());
+    }, QM_HOST_REHUNT_MS);
   });
   peer.on('connection', conn => {
     if(token !== qmToken || peerObj !== peer || transport){ try{ conn.close(); }catch(e){} return; }
+    if(qmHostRehuntTimer){ clearTimeout(qmHostRehuntTimer); qmHostRehuntTimer = null; }
     transport = {
       send(o){ if(conn.open) conn.send(JSON.stringify(o)); },
       isOpen(){ return conn.open; },
@@ -961,6 +1018,8 @@ function hostQuickMatchSlot(token, slot, tries){
     if(token !== qmToken || peerObj !== peer) return;
     if(err.type === 'unavailable-id' && tries < QM_SLOTS){
       hostQuickMatchSlot(token, (slot + 1) % QM_SLOTS, tries + 1); // lost the race for this slot, try the next
+    } else if(PEERJS_TRANSIENT_ERRS.has(err.type) && tries < PEERJS_MAX_AUTO_RETRIES){
+      setTimeout(() => { if(token === qmToken && !transport) hostQuickMatchSlot(token, slot, tries + 1); }, 800);
     } else {
       setConnStatus('Không tìm được trận (' + err.type + '). Thử lại sau.', 'err');
       randomMatchBtn.style.display = '';
